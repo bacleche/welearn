@@ -1,0 +1,239 @@
+.card {
+    background: #ffffff;
+    border: 1px solid #e0e7ff;
+    border-radius: 20px;
+    box-shadow: 0 8px 32px rgba(79, 70, 229, 0.12);
+    padding: 3rem 2.5rem;
+    width: 100%;
+    max-width: 440px;
+    animation: fadeUp 0.5s ease both;
+}
+
+.main h1 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 0.4rem;
+}
+
+.sub {
+    font-size: 0.85rem;
+    color: #6b7280;
+    margin-bottom: 1.75rem;
+}
+
+.sub a {
+    color: #4f46e5;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.sub a:hover {
+    text-decoration: underline;
+}
+
+.fieldRow {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.25rem;
+    font-size: 0.83rem;
+}
+
+.checkboxLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #6b7280;
+    cursor: pointer;
+}
+
+.checkboxLabel input {
+    accent-color: #4f46e5;
+}
+
+.forgot {
+    color: #4f46e5;
+    text-decoration: none;
+    font-size: 0.83rem;
+}
+
+.forgot:hover {
+    text-decoration: underline;
+}
+
+.btnGoogle {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 0.75rem;
+    border: 1.5px solid #e0e7ff;
+    border-radius: 12px;
+    background: #fff;
+    color: #1e1b4b;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.btnGoogle:hover {
+    border-color: #4f46e5;
+    box-shadow: 0 2px 8px rgba(79, 70, 229, 0.1);
+}
+
+.logoWrap {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px solid #f0f0fa;
+}
+
+.logoWrap svg {
+    width: 200px;
+    height: auto;
+}
+
+.cardHeader {
+    text-align: center;
+    margin-bottom: 1.75rem;
+}
+
+.cardHeader h1 {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1e1b4b;
+    margin-bottom: 0.3rem;
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+    .logoWrap svg {
+        width: 200px;
+    }
+
+    .card {
+        padding: 2rem 1.25rem;
+        border-radius: 16px;
+    }
+}
+
+@keyframes fadeUp {
+    from {
+        opacity: 0;
+        transform: translateY(24px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 4rem 1rem;
+    background:
+        radial-gradient(ellipse at 20% 50%, rgba(79, 70, 229, .08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(6, 182, 212, .07) 0%, transparent 50%),
+        #f8faff;
+}
+
+.badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: #ede9fe;
+    color: #4f46e5;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.25rem 0.75rem;
+    border-radius: 999px;
+    margin-bottom: 1.25rem;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.field {
+    margin-bottom: 1.25rem;
+}
+
+.field label {
+    display: block;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: #1e1b4b;
+    margin-bottom: 0.4rem;
+}
+
+.field input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1.5px solid #e0e7ff;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    color: #1e1b4b;
+    background: #f8faff;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.field input:focus {
+    border-color: #4f46e5;
+    box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    background: #fff;
+}
+
+.btnSubmit {
+    width: 100%;
+    padding: 0.85rem;
+    background: linear-gradient(135deg, #4f46e5, #06b6d4);
+    color: #fff;
+    border: none;
+    border-radius: 12px;
+    font-family: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.15s;
+    margin-top: 0.5rem;
+}
+
+.btnSubmit:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
+}
+
+.divider {
+    text-align: center;
+    margin: 1.5rem 0;
+    position: relative;
+    color: #6b7280;
+    font-size: 0.82rem;
+}
+
+.divider::before,
+.divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 40%;
+    height: 1px;
+    background: #e0e7ff;
+}
+
+.divider::before {
+    left: 0;
+}
+
+.divider::after {
+    right: 0;
+}
