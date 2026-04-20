@@ -1,0 +1,831 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ICONNECT – Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4f46e5;--primary-d:#3730a3;--primary-l:#ede9fe;
+  --accent:#06b6d4;--accent-l:#cffafe;
+  --success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+  --bg:#f8faff;--surface:#ffffff;--text:#1e1b4b;--muted:#6b7280;
+  --border:#e0e7ff;--radius:12px;--shadow:0 8px 32px rgba(79,70,229,.12);
+}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:260px;min-height:100vh;background:linear-gradient(180deg,#1e1b4b 0%,#312e81 100%);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto}
+.sidebar-logo{padding:1.75rem 1.5rem 1.25rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.logo-text{font-size:1.5rem;font-weight:800;color:#fff}
+.logo-text span{background:linear-gradient(135deg,#a5b4fc,var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:.7rem;color:rgba(255,255,255,.4);font-weight:500;letter-spacing:.08em;text-transform:uppercase;margin-top:.1rem}
+.sidebar-user{display:flex;align-items:center;gap:.85rem;padding:1.25rem 1.5rem;border-bottom:1px solid rgba(255,255,255,.1)}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,#f87171,#ef4444);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0;border:2px solid rgba(255,255,255,.2)}
+.user-name{font-size:.88rem;font-weight:600;color:#fff}
+.badge-role{display:inline-block;background:rgba(239,68,68,.25);color:#fca5a5;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem}
+nav{flex:1;padding:1rem 0}
+.nav-section{padding:.5rem 1.5rem .25rem;font-size:.62rem;font-weight:700;color:rgba(255,255,255,.3);letter-spacing:.1em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.5rem;margin:.1rem .75rem;border-radius:var(--radius);cursor:pointer;transition:all .2s;color:rgba(255,255,255,.55);font-size:.875rem;font-weight:500}
+.nav-item:hover{background:rgba(255,255,255,.1);color:#fff}
+.nav-item.active{background:rgba(165,180,252,.15);color:#a5b4fc;font-weight:600;border-left:3px solid #a5b4fc;border-radius:0 var(--radius) var(--radius) 0;padding-left:calc(1.5rem - 3px)}
+.nav-item .icon{font-size:1.05rem;width:22px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:999px}
+.nav-badge.warn{background:var(--warning)}
+.sidebar-footer{padding:1.25rem 1.5rem;border-top:1px solid rgba(255,255,255,.1)}
+.logout-btn{display:flex;align-items:center;gap:.75rem;color:rgba(255,255,255,.4);font-size:.875rem;cursor:pointer;transition:color .2s}
+.logout-btn:hover{color:#fca5a5}
+
+/* MAIN */
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-left{display:flex;align-items:center;gap:1rem}
+.topbar-title{font-size:1.1rem;font-weight:700;color:var(--text)}
+.topbar-title span{color:var(--primary)}
+.date-badge{background:var(--primary-l);color:var(--primary);font-size:.72rem;font-weight:600;padding:.25rem .75rem;border-radius:999px}
+.topbar-right{display:flex;align-items:center;gap:.75rem}
+.search-box{display:flex;align-items:center;gap:.5rem;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:.4rem .85rem;transition:border-color .2s}
+.search-box:focus-within{border-color:var(--primary)}
+.search-box input{border:none;background:transparent;outline:none;font-family:'Poppins',sans-serif;font-size:.82rem;color:var(--text);width:180px}
+.icon-btn{width:36px;height:36px;border-radius:var(--radius);background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;position:relative;transition:all .2s}
+.icon-btn:hover{border-color:var(--primary);background:var(--primary-l)}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:2px solid var(--surface)}
+.content{flex:1;padding:2rem;overflow-y:auto}
+
+/* PAGE SYSTEM */
+.page{display:none}.page.active{display:block}
+
+/* SHARED */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.card-title{font-size:1rem;font-weight:700;color:var(--text)}
+.card-action{font-size:.8rem;color:var(--primary);font-weight:600;cursor:pointer;background:none;border:none;font-family:'Poppins',sans-serif}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.2rem;border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
+.btn-primary:hover{opacity:.88}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:#fee2e2;color:var(--danger);border:none}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.btn-success{background:#d1fae5;color:var(--success);border:none}
+.btn-success:hover{background:var(--success);color:#fff}
+.status-pill{padding:.2rem .65rem;border-radius:999px;font-size:.68rem;font-weight:700;white-space:nowrap}
+.sp-active{background:#d1fae5;color:var(--success)}
+.sp-pending{background:#fef3c7;color:var(--warning)}
+.sp-suspended{background:#fee2e2;color:var(--danger)}
+.sp-review{background:var(--primary-l);color:var(--primary)}
+.sp-pub{background:#d1fae5;color:var(--success)}
+.sp-draft{background:#fef3c7;color:var(--warning)}
+.t-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ============ PAGE 1: DASHBOARD ============ */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
+.kpi-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.kpi-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.kpi-card .bg-icon{position:absolute;right:-10px;bottom:-10px;font-size:5rem;opacity:.05}
+.kpi-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.kpi-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.kpi-icon.p{background:var(--primary-l)}.kpi-icon.g{background:#d1fae5}.kpi-icon.y{background:#fef3c7}.kpi-icon.c{background:var(--accent-l)}.kpi-icon.r{background:#fee2e2}
+.kpi-trend{display:flex;align-items:center;gap:.25rem;font-size:.72rem;font-weight:700;padding:.2rem .55rem;border-radius:999px}
+.kpi-trend.up{background:#d1fae5;color:var(--success)}.kpi-trend.down{background:#fee2e2;color:var(--danger)}
+.kpi-value{font-size:2rem;font-weight:800;color:var(--text);line-height:1;margin-bottom:.25rem}
+.kpi-label{font-size:.8rem;color:var(--muted);font-weight:500}
+.kpi-sub{font-size:.72rem;color:var(--muted);margin-top:.35rem}
+.kpi-wide{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem}
+.layout-main{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.chart-area{position:relative;height:110px;display:flex;align-items:flex-end;gap:.5rem}
+.ch-bar{flex:1;border-radius:6px 6px 0 0;cursor:pointer;position:relative;transition:filter .2s}
+.ch-bar.primary{background:linear-gradient(to top,var(--primary),#818cf8)}
+.ch-bar.accent{background:linear-gradient(to top,var(--accent),#67e8f9)}
+.ch-bar:hover{filter:brightness(1.1)}
+.ch-labels{display:flex;gap:.5rem;margin-top:.4rem}
+.ch-label{flex:1;text-align:center;font-size:.65rem;color:var(--muted)}
+.chart-legend{display:flex;gap:1.25rem;margin-bottom:.85rem}
+.cl{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--muted)}
+.cl-dot{width:10px;height:10px;border-radius:3px}
+.data-table{width:100%;border-collapse:collapse}
+.data-table thead th{text-align:left;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:.5rem .75rem;border-bottom:2px solid var(--border)}
+.data-table tbody td{padding:.7rem .75rem;border-bottom:1px solid var(--border);font-size:.82rem;vertical-align:middle}
+.data-table tbody tr:last-child td{border-bottom:none}
+.data-table tbody tr:hover td{background:var(--bg)}
+.t-name{font-weight:600;color:var(--text)}.t-sub{font-size:.7rem;color:var(--muted)}
+.alert-item{display:flex;align-items:flex-start;gap:.85rem;padding:.8rem;border-radius:var(--radius);margin-bottom:.6rem;border:1px solid}
+.alert-item.warn{background:#fffbeb;border-color:#fde68a}
+.alert-item.danger{background:#fff1f2;border-color:#fecdd3}
+.alert-item.info{background:#f0f9ff;border-color:#bae6fd}
+.alert-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:.9rem}
+.alert-icon.warn{background:#fef3c7}.alert-icon.danger{background:#fee2e2}.alert-icon.info{background:var(--accent-l)}
+.alert-text{flex:1;font-size:.8rem;color:var(--text)}.alert-text strong{display:block;font-weight:700;margin-bottom:.1rem}
+.bottom-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem;margin-bottom:1.5rem}
+.donut-wrap{display:flex;align-items:center;gap:1.25rem}
+.donut{position:relative;flex-shrink:0}
+.donut-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center}
+.donut-val{font-size:1.15rem;font-weight:800;color:var(--text);line-height:1}
+.donut-lbl{font-size:.6rem;color:var(--muted);font-weight:500}
+.donut-legend{flex:1}
+.dl{display:flex;align-items:center;gap:.5rem;margin-bottom:.5rem;font-size:.75rem}
+.dl-dot{width:10px;height:10px;border-radius:3px;flex-shrink:0}
+.dl-name{flex:1;color:var(--text);font-weight:500}
+.dl-pct{font-weight:700;color:var(--text)}
+.top-course{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)}
+.top-course:last-child{border-bottom:none}
+.tc-rank{width:24px;height:24px;border-radius:6px;background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:800;color:var(--muted);flex-shrink:0}
+.tc-rank.gold{background:linear-gradient(135deg,#fbbf24,#f59e0b);border:none;color:#fff}
+.tc-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.tc-i1{background:var(--primary-l)}.tc-i2{background:var(--accent-l)}.tc-i3{background:#d1fae5}.tc-i4{background:#fef3c7}.tc-i5{background:#fee2e2}
+.tc-info{flex:1}.tc-name{font-size:.8rem;font-weight:700;color:var(--text)}.tc-meta{font-size:.68rem;color:var(--muted)}
+.tc-enroll{font-size:.72rem;font-weight:600;color:var(--primary);white-space:nowrap}
+.log-item{display:flex;align-items:center;gap:.75rem;padding:.6rem 0;border-bottom:1px solid var(--border)}
+.log-item:last-child{border-bottom:none}
+.log-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.75rem;flex-shrink:0}
+.log-i-g{background:#d1fae5}.log-i-p{background:var(--primary-l)}.log-i-y{background:#fef3c7}.log-i-r{background:#fee2e2}
+.log-text{flex:1;font-size:.78rem;color:var(--muted)}.log-text strong{color:var(--text);font-weight:700}
+.log-time{font-size:.68rem;color:var(--muted);white-space:nowrap}
+
+/* ============ PAGE 2: UTILISATEURS ============ */
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem}
+.page-title{font-size:1.4rem;font-weight:800;color:var(--text)}
+.page-title span{color:var(--primary)}
+.filters-bar{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap}
+.filter-btn{padding:.4rem 1rem;border-radius:999px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .2s;font-family:'Poppins',sans-serif}
+.filter-btn.active,.filter-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.search-filter{display:flex;align-items:center;gap:.5rem;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:.45rem 1rem;flex:1;max-width:320px}
+.search-filter input{border:none;background:transparent;outline:none;font-family:'Poppins',sans-serif;font-size:.82rem;color:var(--text);width:100%}
+.users-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.table-toolbar{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-bottom:1px solid var(--border)}
+.selected-info{font-size:.8rem;color:var(--muted)}
+.table-actions{display:flex;gap:.5rem}
+.full-table{width:100%;border-collapse:collapse}
+.full-table thead th{text-align:left;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:.75rem 1rem;border-bottom:2px solid var(--border);background:var(--bg)}
+.full-table thead th:first-child{width:40px}
+.full-table tbody td{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-size:.82rem;vertical-align:middle}
+.full-table tbody tr:last-child td{border-bottom:none}
+.full-table tbody tr:hover td{background:var(--bg)}
+input[type=checkbox]{accent-color:var(--primary);width:15px;height:15px;cursor:pointer}
+.user-cell{display:flex;align-items:center;gap:.75rem}
+.action-group{display:flex;gap:.4rem}
+.action-btn{padding:.2rem .65rem;border-radius:7px;font-size:.7rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:transparent;font-family:'Poppins',sans-serif;transition:all .2s;color:var(--muted)}
+.action-btn:hover{border-color:var(--primary);color:var(--primary)}
+.action-btn.del:hover{border-color:var(--danger);color:var(--danger)}
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-top:1px solid var(--border)}
+.pag-info{font-size:.78rem;color:var(--muted)}
+.pag-btns{display:flex;gap:.4rem}
+.pag-btn{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;transition:all .2s;color:var(--muted)}
+.pag-btn.active,.pag-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ============ PAGE 3: COURS ============ */
+.courses-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem}
+.course-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.course-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.course-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:2.5rem;position:relative}
+.ct1{background:linear-gradient(135deg,#ede9fe,#c4b5fd)}
+.ct2{background:linear-gradient(135deg,#cffafe,#a5f3fc)}
+.ct3{background:linear-gradient(135deg,#d1fae5,#6ee7b7)}
+.ct4{background:linear-gradient(135deg,#fef3c7,#fcd34d)}
+.ct5{background:linear-gradient(135deg,#fee2e2,#fca5a5)}
+.ct6{background:linear-gradient(135deg,#ede9fe,#818cf8)}
+.course-badge{position:absolute;top:.75rem;right:.75rem;padding:.2rem .6rem;border-radius:999px;font-size:.65rem;font-weight:700;background:rgba(255,255,255,.9)}
+.course-body{padding:1.1rem}
+.course-title{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.3rem}
+.course-teacher{font-size:.75rem;color:var(--muted);margin-bottom:.75rem}
+.course-meta{display:flex;gap:.75rem;flex-wrap:wrap}
+.meta-item{display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--muted)}
+.course-footer{padding:.75rem 1.1rem;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.course-price{font-size:.9rem;font-weight:800;color:var(--primary)}
+.course-actions{display:flex;gap:.4rem}
+
+/* ============ PAGE 4: PAIEMENTS ============ */
+.revenue-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
+.rev-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem}
+.rev-label{font-size:.78rem;color:var(--muted);margin-bottom:.4rem}
+.rev-value{font-size:1.6rem;font-weight:800;color:var(--text)}
+.rev-change{font-size:.72rem;font-weight:600;margin-top:.3rem}
+.rev-change.up{color:var(--success)}.rev-change.down{color:var(--danger)}
+.payment-filters{display:flex;gap:.75rem;margin-bottom:1.5rem;align-items:center}
+.select-filter{padding:.4rem .85rem;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--surface);font-family:'Poppins',sans-serif;font-size:.8rem;color:var(--text);cursor:pointer;outline:none}
+.pay-status{padding:.2rem .65rem;border-radius:999px;font-size:.68rem;font-weight:700}
+.pay-completed{background:#d1fae5;color:var(--success)}
+.pay-pending{background:#fef3c7;color:var(--warning)}
+.pay-failed{background:#fee2e2;color:var(--danger)}
+.pay-refunded{background:var(--primary-l);color:var(--primary)}
+
+/* ============ PAGE 5: FORMATEURS ============ */
+.teachers-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.25rem;margin-bottom:2rem}
+.teacher-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;transition:transform .2s,box-shadow .2s}
+.teacher-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.teacher-header{display:flex;align-items:center;gap:1rem;margin-bottom:1rem}
+.teacher-avatar{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.1rem;font-weight:700;color:#fff;flex-shrink:0}
+.teacher-name{font-size:.95rem;font-weight:700;color:var(--text)}
+.teacher-email{font-size:.75rem;color:var(--muted)}
+.teacher-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin-bottom:1rem}
+.ts-item{text-align:center;background:var(--bg);border-radius:10px;padding:.6rem .4rem}
+.ts-val{font-size:1rem;font-weight:800;color:var(--text)}
+.ts-lbl{font-size:.62rem;color:var(--muted)}
+.teacher-footer{display:flex;align-items:center;justify-content:space-between}
+.verified-badge{display:flex;align-items:center;gap:.3rem;font-size:.72rem;font-weight:600}
+.verified-badge.yes{color:var(--success)}
+.verified-badge.no{color:var(--warning)}
+.stars{color:#fbbf24;font-size:.8rem;letter-spacing:.05em}
+
+/* ============ PAGE 6: CERTIFICATS ============ */
+.cert-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
+.cert-stat{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;text-align:center}
+.cert-icon{font-size:2rem;margin-bottom:.5rem}
+.cert-val{font-size:1.6rem;font-weight:800;color:var(--text)}
+.cert-lbl{font-size:.78rem;color:var(--muted)}
+.cert-card{display:flex;align-items:center;gap:1rem;padding:1rem;border:1.5px solid var(--border);border-radius:12px;background:var(--surface);margin-bottom:.75rem;transition:border-color .2s}
+.cert-card:hover{border-color:var(--primary)}
+.cert-icon-sm{width:44px;height:44px;background:linear-gradient(135deg,#fbbf24,#f59e0b);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0}
+.cert-info{flex:1}
+.cert-name{font-size:.85rem;font-weight:700;color:var(--text)}
+.cert-meta{font-size:.72rem;color:var(--muted);margin-top:.15rem}
+.cert-id{font-size:.72rem;font-family:monospace;background:var(--bg);padding:.2rem .5rem;border-radius:6px;color:var(--primary);font-weight:700}
+
+/* ============ PAGE 7: SIGNALEMENTS ============ */
+.report-card{background:var(--surface);border:1.5px solid var(--border);border-radius:14px;padding:1.25rem;margin-bottom:1rem;transition:border-color .2s}
+.report-card.urgent{border-color:#fca5a5;background:#fff1f2}
+.report-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.75rem}
+.report-type{display:flex;align-items:center;gap:.5rem;font-size:.8rem;font-weight:700;color:var(--text)}
+.report-date{font-size:.72rem;color:var(--muted)}
+.report-body{font-size:.82rem;color:var(--muted);margin-bottom:.85rem}
+.report-footer{display:flex;align-items:center;justify-content:space-between}
+.report-from{font-size:.75rem;color:var(--text);font-weight:600}
+.report-actions{display:flex;gap:.5rem}
+
+/* ============ PAGE 8: PARAMÈTRES ============ */
+.settings-grid{display:grid;grid-template-columns:240px 1fr;gap:1.5rem}
+.settings-nav{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:.75rem;height:fit-content}
+.set-nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem .85rem;border-radius:10px;cursor:pointer;font-size:.85rem;font-weight:500;color:var(--muted);transition:all .2s}
+.set-nav-item:hover{background:var(--primary-l);color:var(--primary)}
+.set-nav-item.active{background:var(--primary);color:#fff;font-weight:600}
+.settings-content{display:flex;flex-direction:column;gap:1.5rem}
+.settings-section{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
+.set-title{font-size:1rem;font-weight:700;color:var(--text);margin-bottom:1.25rem;padding-bottom:.85rem;border-bottom:1px solid var(--border)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.form-label{font-size:.8rem;font-weight:600;color:var(--text)}
+.form-input{padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--primary)}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none}
+.toggle-info{flex:1}
+.toggle-title{font-size:.85rem;font-weight:600;color:var(--text)}
+.toggle-desc{font-size:.75rem;color:var(--muted);margin-top:.1rem}
+.toggle{position:relative;width:44px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;cursor:pointer;inset:0;background:#e0e7ff;border-radius:999px;transition:.3s}
+.toggle-slider:before{content:'';position:absolute;height:18px;width:18px;left:3px;bottom:3px;background:#fff;border-radius:50%;transition:.3s}
+.toggle input:checked + .toggle-slider{background:var(--primary)}
+.toggle input:checked + .toggle-slider:before{transform:translateX(20px)}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">I<span>CONNECT</span></div>
+    <div class="logo-sub">Panneau Administrateur</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="avatar">AD</div>
+    <div>
+      <div class="user-name">Admin Principal</div>
+      <div class="badge-role">Administrateur</div>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-section">Vue d'ensemble</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">🏠</span> Tableau de bord</div>
+
+    <div class="nav-section">Gestion</div>
+    <div class="nav-item" onclick="showPage('utilisateurs',this)"><span class="icon">👥</span> Utilisateurs <span class="nav-badge">12</span></div>
+    <div class="nav-item" onclick="showPage('cours',this)"><span class="icon">📚</span> Cours</div>
+    <div class="nav-item" onclick="showPage('formateurs',this)"><span class="icon">🎓</span> Formateurs <span class="nav-badge warn">3</span></div>
+    <div class="nav-item" onclick="showPage('paiements',this)"><span class="icon">💳</span> Paiements</div>
+    <div class="nav-item" onclick="showPage('certificats',this)"><span class="icon">🏆</span> Certificats</div>
+
+    <div class="nav-section">Modération</div>
+    <div class="nav-item" onclick="showPage('signalements',this)"><span class="icon">🚨</span> Signalements <span class="nav-badge">5</span></div>
+
+    <div class="nav-section">Système</div>
+    <div class="nav-item" onclick="showPage('parametres',this)"><span class="icon">⚙️</span> Paramètres</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="logout-btn">
+      <span>🚪</span> Déconnexion
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="topbar-title" id="topbarTitle">Tableau de bord <span>Admin</span></div>
+      <div class="date-badge">13 Avril 2026</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box"><span>🔍</span><input placeholder="Rechercher…"/></div>
+      <div class="icon-btn">⚙️</div>
+      <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+      <div class="icon-btn">👤</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ========== PAGE: DASHBOARD ========== -->
+    <div class="page active" id="page-dashboard">
+      <!-- KPIs -->
+      <div class="kpi-grid">
+        <div class="kpi-card">
+          <div class="bg-icon">👥</div>
+          <div class="kpi-top"><div class="kpi-icon p">👥</div><div class="kpi-trend up">↑ 8.2%</div></div>
+          <div class="kpi-value">2,847</div>
+          <div class="kpi-label">Utilisateurs actifs</div>
+          <div class="kpi-sub">↑ 214 ce mois-ci</div>
+        </div>
+        <div class="kpi-card">
+          <div class="bg-icon">💰</div>
+          <div class="kpi-top"><div class="kpi-icon g">💰</div><div class="kpi-trend up">↑ 12.4%</div></div>
+          <div class="kpi-value">48 620€</div>
+          <div class="kpi-label">Revenus totaux</div>
+          <div class="kpi-sub">↑ 5 380€ vs mars</div>
+        </div>
+        <div class="kpi-card">
+          <div class="bg-icon">📚</div>
+          <div class="kpi-top"><div class="kpi-icon y">📚</div><div class="kpi-trend up">↑ 4.1%</div></div>
+          <div class="kpi-value">127</div>
+          <div class="kpi-label">Cours publiés</div>
+          <div class="kpi-sub">8 en révision</div>
+        </div>
+        <div class="kpi-card">
+          <div class="bg-icon">🏆</div>
+          <div class="kpi-top"><div class="kpi-icon c">🏆</div><div class="kpi-trend up">↑ 18.7%</div></div>
+          <div class="kpi-value">1,204</div>
+          <div class="kpi-label">Certificats émis</div>
+          <div class="kpi-sub">↑ 189 ce mois</div>
+        </div>
+      </div>
+      <div class="kpi-wide">
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-icon p">🎓</div><div class="kpi-trend up">↑ 2</div></div>
+          <div class="kpi-value">48</div>
+          <div class="kpi-label">Formateurs vérifiés</div>
+          <div class="kpi-sub">3 en attente de validation</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-icon g">📈</div><div class="kpi-trend up">↑ 3.1%</div></div>
+          <div class="kpi-value">67.4%</div>
+          <div class="kpi-label">Taux de complétion moyen</div>
+          <div class="kpi-sub">Moyenne plateforme</div>
+        </div>
+        <div class="kpi-card">
+          <div class="kpi-top"><div class="kpi-icon y">⭐</div></div>
+          <div class="kpi-value">4.7/5</div>
+          <div class="kpi-label">Note moyenne des cours</div>
+          <div class="kpi-sub">Basé sur 8 240 avis</div>
+        </div>
+      </div>
+      <!-- Charts + Table -->
+      <div class="layout-main">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📊 Revenus & Inscriptions</div>
+            <select style="font-size:.75rem;border:1.5px solid var(--border);border-radius:8px;padding:.2rem .5rem;font-family:'Poppins',sans-serif;color:var(--muted);background:var(--surface);cursor:pointer"><option>2026</option><option>2025</option></select>
+          </div>
+          <div class="chart-legend">
+            <div class="cl"><div class="cl-dot" style="background:var(--primary)"></div>Revenus (€)</div>
+            <div class="cl"><div class="cl-dot" style="background:var(--accent)"></div>Inscriptions</div>
+          </div>
+          <div class="chart-area">
+            <div class="ch-bar primary" style="height:45%"></div>
+            <div class="ch-bar accent" style="height:35%"></div>
+            <div class="ch-bar primary" style="height:60%"></div>
+            <div class="ch-bar accent" style="height:50%"></div>
+            <div class="ch-bar primary" style="height:55%"></div>
+            <div class="ch-bar accent" style="height:42%"></div>
+            <div class="ch-bar primary" style="height:80%"></div>
+            <div class="ch-bar accent" style="height:65%"></div>
+            <div class="ch-bar primary" style="height:75%"></div>
+            <div class="ch-bar accent" style="height:58%"></div>
+            <div class="ch-bar primary" style="height:90%"></div>
+            <div class="ch-bar accent" style="height:78%"></div>
+          </div>
+          <div class="ch-labels">
+            <span class="ch-label">Jan</span><span class="ch-label">Fév</span><span class="ch-label">Mar</span><span class="ch-label">Avr</span>
+            <span class="ch-label">Mai</span><span class="ch-label">Jun</span><span class="ch-label">Jul</span><span class="ch-label">Aoû</span>
+            <span class="ch-label">Sep</span><span class="ch-label">Oct</span><span class="ch-label">Nov</span><span class="ch-label">Déc</span>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">⚠️ Alertes</div><button class="card-action">Tout voir</button></div>
+          <div class="alert-item danger">
+            <div class="alert-icon danger">🚨</div>
+            <div class="alert-text"><strong>Contenu signalé</strong>Cours "Python avancé" – 3 signalements</div>
+          </div>
+          <div class="alert-item warn">
+            <div class="alert-icon warn">⏳</div>
+            <div class="alert-text"><strong>Formateurs en attente</strong>3 comptes à valider</div>
+          </div>
+          <div class="alert-item info">
+            <div class="alert-icon info">💳</div>
+            <div class="alert-text"><strong>Paiement échoué</strong>2 transactions à vérifier</div>
+          </div>
+          <div class="alert-item warn">
+            <div class="alert-icon warn">📋</div>
+            <div class="alert-text"><strong>Cours en révision</strong>8 cours en attente de validation</div>
+          </div>
+        </div>
+      </div>
+      <!-- Utilisateurs récents -->
+      <div class="card" style="margin-bottom:1.5rem">
+        <div class="card-header"><div class="card-title">👤 Nouveaux utilisateurs</div><button class="card-action" onclick="showPage('utilisateurs',null)">Tous →</button></div>
+        <table class="data-table">
+          <thead><tr><th>Utilisateur</th><th>Rôle</th><th>Inscription</th><th>Cours</th><th>Statut</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent))">JK</div><div><div class="t-name">Jean Konan</div><div class="t-sub">jean@email.com</div></div></div></td><td><span style="font-size:.75rem;color:#0e7490;font-weight:600">Formateur</span></td><td><span style="font-size:.78rem">18 Fév 2026</span></td><td>2</td><td><span class="status-pill sp-review">En révision</span></td><td><button class="action-btn">Valider</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar" style="background:linear-gradient(135deg,var(--danger),#f87171)">SL</div><div><div class="t-name">Sara Lima</div><div class="t-sub">sara@email.com</div></div></div></td><td><span style="font-size:.75rem;color:var(--muted);font-weight:500">Étudiant</span></td><td>1 Mar 2026</td><td>3</td><td><span class="status-pill sp-pending">En attente</span></td><td><button class="action-btn">Gérer</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar" style="background:linear-gradient(135deg,var(--accent),#67e8f9)">AB</div><div><div class="t-name">Amara Bah</div><div class="t-sub">amara@email.com</div></div></div></td><td><span style="font-size:.75rem;color:var(--muted);font-weight:500">Étudiant</span></td><td>25 Mar 2026</td><td>1</td><td><span class="status-pill sp-active">Actif</span></td><td><button class="action-btn">Gérer</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Bottom -->
+      <div class="bottom-grid">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📊 Répartition catégories</div></div>
+          <div class="donut-wrap">
+            <div class="donut">
+              <svg viewBox="0 0 36 36" width="110" height="110">
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e0e7ff" stroke-width="3.5"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#4f46e5" stroke-width="3.5" stroke-dasharray="40 60" stroke-dashoffset="0"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#06b6d4" stroke-width="3.5" stroke-dasharray="25 75" stroke-dashoffset="-40"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#10b981" stroke-width="3.5" stroke-dasharray="20 80" stroke-dashoffset="-65"/>
+                <circle cx="18" cy="18" r="15.9" fill="none" stroke="#f59e0b" stroke-width="3.5" stroke-dasharray="15 85" stroke-dashoffset="-85"/>
+              </svg>
+              <div class="donut-center"><div class="donut-val">127</div><div class="donut-lbl">cours</div></div>
+            </div>
+            <div class="donut-legend">
+              <div class="dl"><div class="dl-dot" style="background:var(--primary)"></div><div class="dl-name">Tech & Dev</div><div class="dl-pct">40%</div></div>
+              <div class="dl"><div class="dl-dot" style="background:var(--accent)"></div><div class="dl-name">Design</div><div class="dl-pct">25%</div></div>
+              <div class="dl"><div class="dl-dot" style="background:var(--success)"></div><div class="dl-name">Business</div><div class="dl-pct">20%</div></div>
+              <div class="dl"><div class="dl-dot" style="background:var(--warning)"></div><div class="dl-name">Marketing</div><div class="dl-pct">15%</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🏆 Top cours du mois</div><button class="card-action">Tous →</button></div>
+          <div class="top-course"><div class="tc-rank gold">1</div><div class="tc-icon tc-i2">💻</div><div class="tc-info"><div class="tc-name">Full Stack Dev</div><div class="tc-meta">Jean Konan</div></div><div class="tc-enroll">124 inscrits</div></div>
+          <div class="top-course"><div class="tc-rank">2</div><div class="tc-icon tc-i1">🎨</div><div class="tc-info"><div class="tc-name">UI/UX Avancé</div><div class="tc-meta">Marie Dubois</div></div><div class="tc-enroll">87 inscrits</div></div>
+          <div class="top-course"><div class="tc-rank">3</div><div class="tc-icon tc-i3">📊</div><div class="tc-info"><div class="tc-name">Data Science</div><div class="tc-meta">Amara Bah</div></div><div class="tc-enroll">76 inscrits</div></div>
+          <div class="top-course"><div class="tc-rank">4</div><div class="tc-icon tc-i5">📱</div><div class="tc-info"><div class="tc-name">Marketing Digital</div><div class="tc-meta">Sophie Lema</div></div><div class="tc-enroll">62 inscrits</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Journal d'activité</div><button class="card-action">Logs →</button></div>
+          <div class="log-item"><div class="log-icon log-i-g">✅</div><div class="log-text"><strong>Cours validé</strong> – Figma Masterclass 2025</div><div class="log-time">5 min</div></div>
+          <div class="log-item"><div class="log-icon log-i-p">👤</div><div class="log-text"><strong>Nouvel utilisateur</strong> – Amara Bah inscrit</div><div class="log-time">18 min</div></div>
+          <div class="log-item"><div class="log-icon log-i-y">💰</div><div class="log-text"><strong>Paiement reçu</strong> – Abonnement Pro · 49€</div><div class="log-time">1h</div></div>
+          <div class="log-item"><div class="log-icon log-i-r">🚨</div><div class="log-text"><strong>Signalement</strong> – Contenu inapproprié signalé</div><div class="log-time">2h</div></div>
+          <div class="log-item"><div class="log-icon log-i-g">🏆</div><div class="log-text"><strong>Certificat émis</strong> – K. Mensah · HTML & CSS</div><div class="log-time">3h</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: UTILISATEURS ========== -->
+    <div class="page" id="page-utilisateurs">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestion des <span>Utilisateurs</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">2 847 utilisateurs au total</div>
+        </div>
+        <button class="btn btn-primary">➕ Ajouter un utilisateur</button>
+      </div>
+      <div class="filters-bar">
+        <div class="search-filter"><span>🔍</span><input placeholder="Rechercher par nom, email…"/></div>
+        <button class="filter-btn active">Tous (2847)</button>
+        <button class="filter-btn">Étudiants (2756)</button>
+        <button class="filter-btn">Formateurs (48)</button>
+        <button class="filter-btn">Admins (3)</button>
+        <button class="filter-btn">Suspendus (12)</button>
+        <select class="select-filter" style="margin-left:auto"><option>Trier par date</option><option>Trier par nom</option><option>Trier par rôle</option></select>
+      </div>
+      <div class="users-table-wrap">
+        <div class="table-toolbar">
+          <div class="selected-info">Affichage de 1-10 sur 2 847</div>
+          <div class="table-actions">
+            <button class="btn btn-outline" style="font-size:.78rem;padding:.4rem .9rem">📤 Exporter</button>
+            <button class="btn btn-danger" style="font-size:.78rem;padding:.4rem .9rem">🗑 Supprimer</button>
+          </div>
+        </div>
+        <table class="full-table">
+          <thead><tr>
+            <th><input type="checkbox"/></th>
+            <th>Utilisateur</th><th>Rôle</th><th>Inscription</th><th>Cours</th><th>Dernière connexion</th><th>Statut</th><th>Actions</th>
+          </tr></thead>
+          <tbody>
+            <tr><td><input type="checkbox"/></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent))">JK</div><div><div class="t-name">Jean Konan</div><div class="t-sub">jean.konan@email.com</div></div></div></td><td><span style="font-size:.75rem;color:#0e7490;font-weight:600;background:var(--accent-l);padding:.2rem .6rem;border-radius:999px">Formateur</span></td><td style="color:var(--muted);font-size:.78rem">18 Fév 2026</td><td style="font-weight:700;text-align:center">5</td><td style="color:var(--muted);font-size:.78rem">Aujourd'hui</td><td><span class="status-pill sp-review">En révision</span></td><td><div class="action-group"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button><button class="action-btn del">Suppr.</button></div></td></tr>
+            <tr><td><input type="checkbox"/></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">MD</div><div><div class="t-name">Marie Dubois</div><div class="t-sub">marie.dubois@email.com</div></div></div></td><td><span style="font-size:.75rem;color:#0e7490;font-weight:600;background:var(--accent-l);padding:.2rem .6rem;border-radius:999px">Formateur</span></td><td style="color:var(--muted);font-size:.78rem">3 Jan 2026</td><td style="font-weight:700;text-align:center">8</td><td style="color:var(--muted);font-size:.78rem">Hier</td><td><span class="status-pill sp-active">Actif</span></td><td><div class="action-group"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button><button class="action-btn del">Suppr.</button></div></td></tr>
+            <tr><td><input type="checkbox"/></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--warning),#fcd34d)">KM</div><div><div class="t-name">Koffi Mensah</div><div class="t-sub">koffi.m@email.com</div></div></div></td><td><span style="font-size:.75rem;color:var(--muted);font-weight:600;background:var(--bg);padding:.2rem .6rem;border-radius:999px;border:1.5px solid var(--border)">Étudiant</span></td><td style="color:var(--muted);font-size:.78rem">10 Mar 2026</td><td style="font-weight:700;text-align:center">3</td><td style="color:var(--muted);font-size:.78rem">Il y a 2j</td><td><span class="status-pill sp-active">Actif</span></td><td><div class="action-group"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button><button class="action-btn del">Suppr.</button></div></td></tr>
+            <tr><td><input type="checkbox"/></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--danger),#f87171)">SL</div><div><div class="t-name">Sara Lima</div><div class="t-sub">sara.lima@email.com</div></div></div></td><td><span style="font-size:.75rem;color:var(--muted);font-weight:600;background:var(--bg);padding:.2rem .6rem;border-radius:999px;border:1.5px solid var(--border)">Étudiant</span></td><td style="color:var(--muted);font-size:.78rem">1 Mar 2026</td><td style="font-weight:700;text-align:center">3</td><td style="color:var(--muted);font-size:.78rem">Il y a 5j</td><td><span class="status-pill sp-pending">En attente</span></td><td><div class="action-group"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button><button class="action-btn del">Suppr.</button></div></td></tr>
+            <tr><td><input type="checkbox"/></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">YD</div><div><div class="t-name">Yann Diallo</div><div class="t-sub">yann.d@email.com</div></div></div></td><td><span style="font-size:.75rem;color:var(--muted);font-weight:600;background:var(--bg);padding:.2rem .6rem;border-radius:999px;border:1.5px solid var(--border)">Étudiant</span></td><td style="color:var(--muted);font-size:.78rem">22 Fév 2026</td><td style="font-weight:700;text-align:center">2</td><td style="color:var(--muted);font-size:.78rem">Aujourd'hui</td><td><span class="status-pill sp-active">Actif</span></td><td><div class="action-group"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button><button class="action-btn del">Suppr.</button></div></td></tr>
+            <tr><td><input type="checkbox"/></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,#0ea5e9,#0284c7)">EN</div><div><div class="t-name">Eva Nkosi</div><div class="t-sub">eva.nkosi@email.com</div></div></div></td><td><span style="font-size:.75rem;color:var(--muted);font-weight:600;background:var(--bg);padding:.2rem .6rem;border-radius:999px;border:1.5px solid var(--border)">Étudiant</span></td><td style="color:var(--muted);font-size:.78rem">5 Avr 2026</td><td style="font-weight:700;text-align:center">1</td><td style="color:var(--muted);font-size:.78rem">Aujourd'hui</td><td><span class="status-pill sp-active">Actif</span></td><td><div class="action-group"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button><button class="action-btn del">Suppr.</button></div></td></tr>
+            <tr><td><input type="checkbox"/></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,#f59e0b,#d97706)">AB</div><div><div class="t-name">Amara Bah</div><div class="t-sub">amara.bah@email.com</div></div></div></td><td><span style="font-size:.75rem;color:#0e7490;font-weight:600;background:var(--accent-l);padding:.2rem .6rem;border-radius:999px">Formateur</span></td><td style="color:var(--muted);font-size:.78rem">25 Mar 2026</td><td style="font-weight:700;text-align:center">1</td><td style="color:var(--muted);font-size:.78rem">Il y a 3j</td><td><span class="status-pill sp-suspended">Suspendu</span></td><td><div class="action-group"><button class="action-btn">Voir</button><button class="action-btn">Réactiver</button><button class="action-btn del">Suppr.</button></div></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="pag-info">Affichage 1-7 sur 2847 résultats</div>
+          <div class="pag-btns">
+            <button class="pag-btn">←</button>
+            <button class="pag-btn active">1</button>
+            <button class="pag-btn">2</button>
+            <button class="pag-btn">3</button>
+            <span style="color:var(--muted);font-size:.8rem;padding:0 .4rem">…</span>
+            <button class="pag-btn">285</button>
+            <button class="pag-btn">→</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: COURS ========== -->
+    <div class="page" id="page-cours">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestion des <span>Cours</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">127 cours publiés · 8 en révision · 15 brouillons</div>
+        </div>
+        <div style="display:flex;gap:.75rem">
+          <button class="btn btn-outline">📤 Exporter</button>
+          <button class="btn btn-primary">➕ Nouveau cours</button>
+        </div>
+      </div>
+      <div class="filters-bar">
+        <div class="search-filter"><span>🔍</span><input placeholder="Rechercher un cours…"/></div>
+        <button class="filter-btn active">Tous (150)</button>
+        <button class="filter-btn">Publiés (127)</button>
+        <button class="filter-btn">En révision (8)</button>
+        <button class="filter-btn">Brouillons (15)</button>
+        <select class="select-filter" style="margin-left:auto"><option>Toutes catégories</option><option>Tech & Dev</option><option>Design</option><option>Business</option></select>
+      </div>
+      <div class="courses-grid">
+        <div class="course-card"><div class="course-thumb ct1"><span>🎨</span><span class="course-badge" style="color:var(--success)">✅ Publié</span></div><div class="course-body"><div class="course-title">UI/UX Design Avancé</div><div class="course-teacher">👤 Marie Dubois · Design</div><div class="course-meta"><span class="meta-item">📚 24 modules</span><span class="meta-item">👥 312 inscrits</span><span class="meta-item">⭐ 4.9</span></div></div><div class="course-footer"><div class="course-price">89€</div><div class="course-actions"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button></div></div></div>
+        <div class="course-card"><div class="course-thumb ct2"><span>💻</span><span class="course-badge" style="color:var(--success)">✅ Publié</span></div><div class="course-body"><div class="course-title">Full Stack Dev – MERN</div><div class="course-teacher">👤 Jean Konan · Tech</div><div class="course-meta"><span class="meta-item">📚 42 modules</span><span class="meta-item">👥 124 inscrits</span><span class="meta-item">⭐ 4.8</span></div></div><div class="course-footer"><div class="course-price">129€</div><div class="course-actions"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button></div></div></div>
+        <div class="course-card"><div class="course-thumb ct3"><span>📊</span><span class="course-badge" style="color:var(--primary)">🔍 Révision</span></div><div class="course-body"><div class="course-title">Data Science & Python</div><div class="course-teacher">👤 Amara Bah · Tech</div><div class="course-meta"><span class="meta-item">📚 35 modules</span><span class="meta-item">👥 76 inscrits</span><span class="meta-item">⭐ 4.7</span></div></div><div class="course-footer"><div class="course-price">99€</div><div class="course-actions"><button class="btn-success btn" style="font-size:.72rem;padding:.25rem .75rem">Valider</button><button class="action-btn del">Rejeter</button></div></div></div>
+        <div class="course-card"><div class="course-thumb ct4"><span>📱</span><span class="course-badge" style="color:var(--success)">✅ Publié</span></div><div class="course-body"><div class="course-title">Marketing Digital 2026</div><div class="course-teacher">👤 Sophie Lema · Business</div><div class="course-meta"><span class="meta-item">📚 28 modules</span><span class="meta-item">👥 62 inscrits</span><span class="meta-item">⭐ 4.6</span></div></div><div class="course-footer"><div class="course-price">69€</div><div class="course-actions"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button></div></div></div>
+        <div class="course-card"><div class="course-thumb ct5"><span>🤖</span><span class="course-badge" style="color:var(--warning)">📝 Brouillon</span></div><div class="course-body"><div class="course-title">Intelligence Artificielle</div><div class="course-teacher">👤 Tech Team · Tech</div><div class="course-meta"><span class="meta-item">📚 18 modules</span><span class="meta-item">👥 0 inscrits</span><span class="meta-item">⭐ —</span></div></div><div class="course-footer"><div class="course-price">149€</div><div class="course-actions"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button></div></div></div>
+        <div class="course-card"><div class="course-thumb ct6"><span>🎬</span><span class="course-badge" style="color:var(--success)">✅ Publié</span></div><div class="course-body"><div class="course-title">Vidéo & Motion Design</div><div class="course-teacher">👤 Luc Martin · Design</div><div class="course-meta"><span class="meta-item">📚 20 modules</span><span class="meta-item">👥 55 inscrits</span><span class="meta-item">⭐ 4.8</span></div></div><div class="course-footer"><div class="course-price">79€</div><div class="course-actions"><button class="action-btn">Voir</button><button class="action-btn">Éditer</button></div></div></div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: FORMATEURS ========== -->
+    <div class="page" id="page-formateurs">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestion des <span>Formateurs</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">48 formateurs vérifiés · 3 en attente de validation</div>
+        </div>
+        <button class="btn btn-primary">➕ Inviter un formateur</button>
+      </div>
+      <!-- Pending validation -->
+      <div class="card" style="margin-bottom:1.5rem;border-color:#fde68a;background:#fffbeb">
+        <div class="card-header"><div class="card-title" style="color:var(--warning)">⏳ En attente de validation (3)</div></div>
+        <table class="full-table">
+          <thead><tr><th>Formateur</th><th>Expertise</th><th>Inscription</th><th>Cours soumis</th><th>Pièces jointes</th><th>Actions</th></tr></thead>
+          <tbody>
+            <tr><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent))">JK</div><div><div class="t-name">Jean Konan</div><div class="t-sub">jean@email.com</div></div></div></td><td style="font-size:.8rem">Full Stack Dev</td><td style="font-size:.78rem;color:var(--muted)">18 Fév 2026</td><td style="text-align:center;font-weight:700">2</td><td><button class="action-btn">📎 Voir CV</button></td><td><div class="action-group"><button class="btn btn-success" style="font-size:.72rem;padding:.3rem .75rem">✅ Valider</button><button class="btn btn-danger" style="font-size:.72rem;padding:.3rem .75rem">❌ Rejeter</button></div></td></tr>
+            <tr><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--warning),#fcd34d)">PD</div><div><div class="t-name">Pierre Dabo</div><div class="t-sub">pierre@email.com</div></div></div></td><td style="font-size:.8rem">Data Science</td><td style="font-size:.78rem;color:var(--muted)">2 Mar 2026</td><td style="text-align:center;font-weight:700">1</td><td><button class="action-btn">📎 Voir CV</button></td><td><div class="action-group"><button class="btn btn-success" style="font-size:.72rem;padding:.3rem .75rem">✅ Valider</button><button class="btn btn-danger" style="font-size:.72rem;padding:.3rem .75rem">❌ Rejeter</button></div></td></tr>
+            <tr><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">NK</div><div><div class="t-name">Nadia Kouyaté</div><div class="t-sub">nadia@email.com</div></div></div></td><td style="font-size:.8rem">Marketing Digital</td><td style="font-size:.78rem;color:var(--muted)">8 Avr 2026</td><td style="text-align:center;font-weight:700">0</td><td><button class="action-btn">📎 Voir CV</button></td><td><div class="action-group"><button class="btn btn-success" style="font-size:.72rem;padding:.3rem .75rem">✅ Valider</button><button class="btn btn-danger" style="font-size:.72rem;padding:.3rem .75rem">❌ Rejeter</button></div></td></tr>
+          </tbody>
+        </table>
+      </div>
+      <!-- Active teachers grid -->
+      <div class="teachers-grid">
+        <div class="teacher-card"><div class="teacher-header"><div class="teacher-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">MD</div><div><div class="teacher-name">Marie Dubois</div><div class="teacher-email">marie@email.com</div></div></div><div class="teacher-stats"><div class="ts-item"><div class="ts-val">8</div><div class="ts-lbl">Cours</div></div><div class="ts-item"><div class="ts-val">312</div><div class="ts-lbl">Étudiants</div></div><div class="ts-item"><div class="ts-val">18 240€</div><div class="ts-lbl">Revenus</div></div></div><div class="teacher-footer"><span class="verified-badge yes">✅ Vérifié</span><div class="stars">★★★★★</div><div style="font-size:.75rem;font-weight:700">4.9</div></div></div>
+        <div class="teacher-card"><div class="teacher-header"><div class="teacher-avatar" style="background:linear-gradient(135deg,var(--accent),#67e8f9)">SL</div><div><div class="teacher-name">Sophie Lema</div><div class="teacher-email">sophie@email.com</div></div></div><div class="teacher-stats"><div class="ts-item"><div class="ts-val">4</div><div class="ts-lbl">Cours</div></div><div class="ts-item"><div class="ts-val">187</div><div class="ts-lbl">Étudiants</div></div><div class="ts-item"><div class="ts-val">9 450€</div><div class="ts-lbl">Revenus</div></div></div><div class="teacher-footer"><span class="verified-badge yes">✅ Vérifié</span><div class="stars">★★★★☆</div><div style="font-size:.75rem;font-weight:700">4.6</div></div></div>
+        <div class="teacher-card"><div class="teacher-header"><div class="teacher-avatar" style="background:linear-gradient(135deg,#f87171,var(--danger))">LM</div><div><div class="teacher-name">Luc Martin</div><div class="teacher-email">luc@email.com</div></div></div><div class="teacher-stats"><div class="ts-item"><div class="ts-val">3</div><div class="ts-lbl">Cours</div></div><div class="ts-item"><div class="ts-val">142</div><div class="ts-lbl">Étudiants</div></div><div class="ts-item"><div class="ts-val">7 320€</div><div class="ts-lbl">Revenus</div></div></div><div class="teacher-footer"><span class="verified-badge yes">✅ Vérifié</span><div class="stars">★★★★★</div><div style="font-size:.75rem;font-weight:700">4.8</div></div></div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: PAIEMENTS ========== -->
+    <div class="page" id="page-paiements">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestion des <span>Paiements</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">Toutes les transactions de la plateforme</div>
+        </div>
+        <button class="btn btn-outline">📥 Exporter CSV</button>
+      </div>
+      <div class="revenue-summary">
+        <div class="rev-card"><div class="rev-label">Revenus totaux</div><div class="rev-value">48 620€</div><div class="rev-change up">↑ 12.4% vs mars</div></div>
+        <div class="rev-card"><div class="rev-label">Revenus avril</div><div class="rev-value">6 840€</div><div class="rev-change up">↑ 8.1%</div></div>
+        <div class="rev-card"><div class="rev-label">Transactions</div><div class="rev-value">1 284</div><div class="rev-change up">↑ 94 ce mois</div></div>
+        <div class="rev-card"><div class="rev-label">Remboursements</div><div class="rev-value">320€</div><div class="rev-change down">↑ 2 ce mois</div></div>
+      </div>
+      <div class="payment-filters">
+        <div class="search-filter" style="max-width:280px"><span>🔍</span><input placeholder="Rechercher transaction…"/></div>
+        <select class="select-filter"><option>Tous les statuts</option><option>Complété</option><option>En attente</option><option>Échoué</option><option>Remboursé</option></select>
+        <select class="select-filter"><option>Avril 2026</option><option>Mars 2026</option><option>Fév 2026</option></select>
+        <select class="select-filter"><option>Tous les cours</option></select>
+      </div>
+      <div class="users-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>Transaction ID</th><th>Utilisateur</th><th>Cours</th><th>Montant</th><th>Formateur (70%)</th><th>Plateforme (30%)</th><th>Date</th><th>Statut</th></tr></thead>
+          <tbody>
+            <tr><td><span style="font-family:monospace;font-size:.72rem;color:var(--primary);background:var(--primary-l);padding:.2rem .5rem;border-radius:6px">TXN-8821</span></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--primary),var(--accent))">KM</div><div class="t-name">Koffi Mensah</div></div></td><td style="font-size:.8rem">UI/UX Avancé</td><td style="font-weight:800;color:var(--text)">89€</td><td style="font-weight:600;color:var(--success)">62.30€</td><td style="font-weight:600;color:var(--primary)">26.70€</td><td style="font-size:.78rem;color:var(--muted)">12 Avr 2026</td><td><span class="pay-status pay-completed">Complété</span></td></tr>
+            <tr><td><span style="font-family:monospace;font-size:.72rem;color:var(--primary);background:var(--primary-l);padding:.2rem .5rem;border-radius:6px">TXN-8820</span></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--danger),#f87171)">SL</div><div class="t-name">Sara Lima</div></div></td><td style="font-size:.8rem">Full Stack Dev</td><td style="font-weight:800;color:var(--text)">129€</td><td style="font-weight:600;color:var(--success)">90.30€</td><td style="font-weight:600;color:var(--primary)">38.70€</td><td style="font-size:.78rem;color:var(--muted)">11 Avr 2026</td><td><span class="pay-status pay-completed">Complété</span></td></tr>
+            <tr><td><span style="font-family:monospace;font-size:.72rem;color:var(--warning);background:#fef3c7;padding:.2rem .5rem;border-radius:6px">TXN-8819</span></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--accent),#67e8f9)">YD</div><div class="t-name">Yann Diallo</div></div></td><td style="font-size:.8rem">Data Science</td><td style="font-weight:800;color:var(--text)">99€</td><td style="font-weight:600;color:var(--muted)">—</td><td style="font-weight:600;color:var(--muted)">—</td><td style="font-size:.78rem;color:var(--muted)">10 Avr 2026</td><td><span class="pay-status pay-pending">En attente</span></td></tr>
+            <tr><td><span style="font-family:monospace;font-size:.72rem;color:var(--danger);background:#fee2e2;padding:.2rem .5rem;border-radius:6px">TXN-8818</span></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">EN</div><div class="t-name">Eva Nkosi</div></div></td><td style="font-size:.8rem">Marketing Digital</td><td style="font-weight:800;color:var(--text)">69€</td><td style="font-weight:600;color:var(--muted)">—</td><td style="font-weight:600;color:var(--muted)">—</td><td style="font-size:.78rem;color:var(--muted)">9 Avr 2026</td><td><span class="pay-status pay-failed">Échoué</span></td></tr>
+            <tr><td><span style="font-family:monospace;font-size:.72rem;color:var(--primary);background:var(--primary-l);padding:.2rem .5rem;border-radius:6px">TXN-8817</span></td><td><div class="user-cell"><div class="t-avatar" style="background:linear-gradient(135deg,var(--success),#34d399)">AB</div><div class="t-name">Amara Bah</div></div></td><td style="font-size:.8rem">Figma Masterclass</td><td style="font-weight:800;color:var(--text)">79€</td><td style="font-weight:600;color:var(--success)">55.30€</td><td style="font-weight:600;color:var(--primary)">23.70€</td><td style="font-size:.78rem;color:var(--muted)">8 Avr 2026</td><td><span class="pay-status pay-completed">Complété</span></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="pag-info">Affichage 1-5 sur 1284 transactions</div>
+          <div class="pag-btns"><button class="pag-btn">←</button><button class="pag-btn active">1</button><button class="pag-btn">2</button><button class="pag-btn">3</button><button class="pag-btn">→</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: CERTIFICATS ========== -->
+    <div class="page" id="page-certificats">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Gestion des <span>Certificats</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">1 204 certificats émis sur la plateforme</div>
+        </div>
+        <button class="btn btn-primary">📄 Générer un certificat</button>
+      </div>
+      <div class="cert-stats">
+        <div class="cert-stat"><div class="cert-icon">🏆</div><div class="cert-val">1 204</div><div class="cert-lbl">Total émis</div></div>
+        <div class="cert-stat"><div class="cert-icon">📅</div><div class="cert-val">189</div><div class="cert-lbl">Ce mois-ci</div></div>
+        <div class="cert-stat"><div class="cert-icon">🎓</div><div class="cert-val">842</div><div class="cert-lbl">Étudiants certifiés</div></div>
+        <div class="cert-stat"><div class="cert-icon">📚</div><div class="cert-val">54</div><div class="cert-lbl">Cours avec certificat</div></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:1.5rem">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📋 Certificats récents</div><button class="card-action">Tous →</button></div>
+          <div class="cert-card"><div class="cert-icon-sm">🏆</div><div class="cert-info"><div class="cert-name">Koffi Mensah – UI/UX Design Avancé</div><div class="cert-meta">Émis le 10 Avr 2026 · Marie Dubois</div></div><div class="cert-id">CERT-2026-4821</div></div>
+          <div class="cert-card"><div class="cert-icon-sm">🏆</div><div class="cert-info"><div class="cert-name">Amara Bah – HTML & CSS Pro</div><div class="cert-meta">Émis le 8 Avr 2026 · Marie Dubois</div></div><div class="cert-id">CERT-2026-4820</div></div>
+          <div class="cert-card"><div class="cert-icon-sm">🏆</div><div class="cert-info"><div class="cert-name">Eva Nkosi – Full Stack MERN</div><div class="cert-meta">Émis le 5 Avr 2026 · Jean Konan</div></div><div class="cert-id">CERT-2026-4819</div></div>
+          <div class="cert-card"><div class="cert-icon-sm">🏆</div><div class="cert-info"><div class="cert-name">Sara Lima – Figma Masterclass</div><div class="cert-meta">Émis le 3 Avr 2026 · Marie Dubois</div></div><div class="cert-id">CERT-2026-4818</div></div>
+          <div class="cert-card"><div class="cert-icon-sm">🏆</div><div class="cert-info"><div class="cert-name">Yann Diallo – Marketing Digital</div><div class="cert-meta">Émis le 1 Avr 2026 · Sophie Lema</div></div><div class="cert-id">CERT-2026-4817</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📊 Top cours certifiants</div></div>
+          <div class="top-course"><div class="tc-rank gold">1</div><div class="tc-icon tc-i1">🎨</div><div class="tc-info"><div class="tc-name">UI/UX Avancé</div><div class="tc-meta">Marie Dubois</div></div><div class="tc-enroll">287 certs</div></div>
+          <div class="top-course"><div class="tc-rank">2</div><div class="tc-icon tc-i2">💻</div><div class="tc-info"><div class="tc-name">HTML & CSS Pro</div><div class="tc-meta">Marie Dubois</div></div><div class="tc-enroll">214 certs</div></div>
+          <div class="top-course"><div class="tc-rank">3</div><div class="tc-icon tc-i3">📊</div><div class="tc-info"><div class="tc-name">Full Stack MERN</div><div class="tc-meta">Jean Konan</div></div><div class="tc-enroll">178 certs</div></div>
+          <div class="top-course"><div class="tc-rank">4</div><div class="tc-icon tc-i4">🤖</div><div class="tc-info"><div class="tc-name">Data Science</div><div class="tc-meta">Amara Bah</div></div><div class="tc-enroll">142 certs</div></div>
+          <div class="top-course"><div class="tc-rank">5</div><div class="tc-icon tc-i5">📱</div><div class="tc-info"><div class="tc-name">Marketing Digital</div><div class="tc-meta">Sophie Lema</div></div><div class="tc-enroll">98 certs</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: SIGNALEMENTS ========== -->
+    <div class="page" id="page-signalements">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Modération – <span>Signalements</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">5 signalements en attente · 2 urgents</div>
+        </div>
+        <div style="display:flex;gap:.75rem">
+          <button class="btn btn-outline">✅ Tout résoudre</button>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:1.5rem">
+        <div>
+          <div class="report-card urgent">
+            <div class="report-header"><div class="report-type">🚨 Contenu inapproprié<span style="background:#fee2e2;color:var(--danger);font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;margin-left:.5rem">URGENT</span></div><div class="report-date">12 Avr 2026 · 14:32</div></div>
+            <div class="report-body">Le cours "Python avancé" contient des propos discriminatoires dans le module 7. 3 étudiants ont signalé ce contenu de façon indépendante.</div>
+            <div class="report-footer"><div class="report-from">📚 Cours: Python Avancé · Signalé par 3 étudiants</div><div class="report-actions"><button class="btn btn-danger" style="font-size:.72rem;padding:.3rem .75rem">🗑 Supprimer contenu</button><button class="btn btn-outline" style="font-size:.72rem;padding:.3rem .75rem">👁 Examiner</button><button class="btn btn-success" style="font-size:.72rem;padding:.3rem .75rem">✅ Résoudre</button></div></div>
+          </div>
+          <div class="report-card urgent">
+            <div class="report-header"><div class="report-type">👤 Comportement suspect<span style="background:#fee2e2;color:var(--danger);font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;margin-left:.5rem">URGENT</span></div><div class="report-date">11 Avr 2026 · 09:15</div></div>
+            <div class="report-body">Un utilisateur envoie des messages non sollicités à plusieurs étudiantes via la messagerie interne. Comportement de harcèlement potentiel.</div>
+            <div class="report-footer"><div class="report-from">👤 Utilisateur: ID-4821 · Signalé par 2 étudiants</div><div class="report-actions"><button class="btn btn-danger" style="font-size:.72rem;padding:.3rem .75rem">🔒 Suspendre</button><button class="btn btn-outline" style="font-size:.72rem;padding:.3rem .75rem">👁 Examiner</button><button class="btn btn-success" style="font-size:.72rem;padding:.3rem .75rem">✅ Résoudre</button></div></div>
+          </div>
+          <div class="report-card">
+            <div class="report-header"><div class="report-type">⭐ Avis frauduleux</div><div class="report-date">10 Avr 2026 · 16:48</div></div>
+            <div class="report-body">Plusieurs avis 5 étoiles suspectés d'être faux sur le cours "Marketing Digital". Profils créés le même jour, avis identiques.</div>
+            <div class="report-footer"><div class="report-from">📚 Cours: Marketing Digital · Signalé par 1 formateur</div><div class="report-actions"><button class="btn btn-danger" style="font-size:.72rem;padding:.3rem .75rem">🗑 Supprimer avis</button><button class="btn btn-outline" style="font-size:.72rem;padding:.3rem .75rem">👁 Examiner</button><button class="btn btn-success" style="font-size:.72rem;padding:.3rem .75rem">✅ Résoudre</button></div></div>
+          </div>
+          <div class="report-card">
+            <div class="report-header"><div class="report-type">💳 Litige paiement</div><div class="report-date">9 Avr 2026 · 11:20</div></div>
+            <div class="report-body">Un étudiant demande un remboursement pour le cours "Full Stack Dev". Motif: contenu non conforme à la description.</div>
+            <div class="report-footer"><div class="report-from">💳 Transaction: TXN-8750 · Montant: 129€</div><div class="report-actions"><button class="btn btn-success" style="font-size:.72rem;padding:.3rem .75rem">💰 Rembourser</button><button class="btn btn-outline" style="font-size:.72rem;padding:.3rem .75rem">👁 Examiner</button><button class="btn btn-danger" style="font-size:.72rem;padding:.3rem .75rem">❌ Refuser</button></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="card" style="margin-bottom:1.25rem">
+            <div class="card-header"><div class="card-title">📊 Statistiques</div></div>
+            <div style="display:flex;flex-direction:column;gap:.85rem">
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem"><span>En attente</span><span style="font-weight:800;color:var(--warning)">5</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem"><span>Résolus ce mois</span><span style="font-weight:800;color:var(--success)">23</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem"><span>Total 2026</span><span style="font-weight:800">47</span></div>
+              <div style="display:flex;justify-content:space-between;align-items:center;font-size:.82rem"><span>Taux résolution</span><span style="font-weight:800;color:var(--success)">96%</span></div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">📋 Historique récent</div></div>
+            <div class="log-item"><div class="log-icon log-i-g">✅</div><div class="log-text"><strong>Résolu</strong> – Contenu spam supprimé</div><div class="log-time">2j</div></div>
+            <div class="log-item"><div class="log-icon log-i-g">✅</div><div class="log-text"><strong>Résolu</strong> – Utilisateur banni</div><div class="log-time">3j</div></div>
+            <div class="log-item"><div class="log-icon log-i-y">💰</div><div class="log-text"><strong>Remboursé</strong> – TXN-8741 · 89€</div><div class="log-time">5j</div></div>
+            <div class="log-item"><div class="log-icon log-i-g">✅</div><div class="log-text"><strong>Résolu</strong> – Avis frauduleux retiré</div><div class="log-time">6j</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: PARAMÈTRES ========== -->
+    <div class="page" id="page-parametres">
+      <div class="page-header">
+        <div class="page-title">⚙️ <span>Paramètres</span> de la plateforme</div>
+      </div>
+      <div class="settings-grid">
+        <div class="settings-nav">
+          <div class="set-nav-item active">🏢 Général</div>
+          <div class="set-nav-item">💳 Paiements</div>
+          <div class="set-nav-item">📧 Emails</div>
+          <div class="set-nav-item">🔒 Sécurité</div>
+          <div class="set-nav-item">🎨 Apparence</div>
+          <div class="set-nav-item">📊 Analytics</div>
+          <div class="set-nav-item">🔗 Intégrations</div>
+        </div>
+        <div class="settings-content">
+          <div class="settings-section">
+            <div class="set-title">🏢 Informations générales</div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Nom de la plateforme</label><input class="form-input" value="ICONNECT Academy"/></div>
+              <div class="form-group"><label class="form-label">URL de la plateforme</label><input class="form-input" value="https://iconnect.academy"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Email de contact</label><input class="form-input" value="contact@iconnect.academy"/></div>
+              <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" value="+33 1 23 45 67 89"/></div>
+            </div>
+            <div class="form-group"><label class="form-label">Description</label><textarea class="form-input" rows="3" style="resize:vertical">Plateforme de formation en ligne spécialisée dans le numérique et le design.</textarea></div>
+            <button class="btn btn-primary">💾 Sauvegarder</button>
+          </div>
+          <div class="settings-section">
+            <div class="set-title">💳 Paramètres financiers</div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Part formateur (%)</label><input class="form-input" value="70"/></div>
+              <div class="form-group"><label class="form-label">Part plateforme (%)</label><input class="form-input" value="30"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Devise principale</label><input class="form-input" value="EUR (€)"/></div>
+              <div class="form-group"><label class="form-label">Délai de virement (jours)</label><input class="form-input" value="30"/></div>
+            </div>
+            <button class="btn btn-primary">💾 Sauvegarder</button>
+          </div>
+          <div class="settings-section">
+            <div class="set-title">🔧 Fonctionnalités</div>
+            <div class="toggle-row"><div class="toggle-info"><div class="toggle-title">Inscription ouverte</div><div class="toggle-desc">Permettre aux nouveaux utilisateurs de s'inscrire</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="toggle-title">Validation des formateurs</div><div class="toggle-desc">Exiger une validation manuelle des nouveaux formateurs</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="toggle-title">Sessions live</div><div class="toggle-desc">Activer les sessions en direct (LiveSession)</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="toggle-title">Certificats automatiques</div><div class="toggle-desc">Émettre automatiquement à 100% de complétion</div></div><label class="toggle"><input type="checkbox" checked/><span class="toggle-slider"></span></label></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="toggle-title">Mode maintenance</div><div class="toggle-desc">Mettre la plateforme en maintenance</div></div><label class="toggle"><input type="checkbox"/><span class="toggle-slider"></span></label></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showPage(pageId, navEl) {
+  // Pages
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  // Nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  // Title
+  const titles = {
+    dashboard: 'Tableau de bord <span>Admin</span>',
+    utilisateurs: 'Gestion des <span>Utilisateurs</span>',
+    cours: 'Gestion des <span>Cours</span>',
+    formateurs: 'Gestion des <span>Formateurs</span>',
+    paiements: 'Gestion des <span>Paiements</span>',
+    certificats: 'Gestion des <span>Certificats</span>',
+    signalements: '<span>Signalements</span> & Modération',
+    parametres: '<span>Paramètres</span>'
+  };
+  document.getElementById('topbarTitle').innerHTML = titles[pageId] || pageId;
+  window.scrollTo(0,0);
+}
+// Filter buttons
+document.querySelectorAll('.filters-bar').forEach(bar => {
+  bar.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+});
+</script>
+</body>
+</html>

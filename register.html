@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICONNECT Learning – Inscription</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #4f46e5;
+      --primary-d: #3730a3;
+      --accent:    #06b6d4;
+      --bg:        #f8faff;
+      --surface:   #ffffff;
+      --text:      #1e1b4b;
+      --muted:     #6b7280;
+      --border:    #e0e7ff;
+      --radius:    12px;
+      --shadow:    0 8px 32px rgba(79,70,229,.12);
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 5%; background: var(--surface);
+      border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 100;
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary); letter-spacing: .05em; }
+    .nav-links { list-style: none; display: flex; gap: 2rem; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-weight: 500; font-size: .9rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .auth-buttons { display: flex; gap: .75rem; align-items: center; }
+    .btn-outline {
+      padding: .5rem 1.2rem; border: 2px solid var(--primary); color: var(--primary);
+      border-radius: var(--radius); text-decoration: none; font-weight: 600; font-size: .85rem; transition: all .2s;
+    }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-primary {
+      padding: .5rem 1.2rem; background: var(--primary); color: #fff; border: none;
+      border-radius: var(--radius); text-decoration: none; font-weight: 600; font-size: .85rem;
+      cursor: pointer; transition: background .2s, transform .15s;
+    }
+    .btn-primary:hover { background: var(--primary-d); transform: translateY(-1px); }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1; display: flex; align-items: center; justify-content: center; padding: 4rem 1rem;
+      background:
+        radial-gradient(ellipse at 80% 50%, rgba(79,70,229,.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 10% 20%, rgba(6,182,212,.07) 0%, transparent 50%),
+        var(--bg);
+    }
+    .wrap { width: 100%; max-width: 500px; }
+
+    /* ── STEPPER ── */
+    .stepper { display: flex; align-items: center; margin-bottom: 1.5rem; }
+    .step-item { display: flex; flex-direction: column; align-items: center; flex: 1; position: relative; }
+    .step-item:not(:last-child)::after {
+      content: ''; position: absolute; top: 18px; left: 60%; width: 80%;
+      height: 2px; background: var(--border); transition: background .4s; z-index: 0;
+    }
+    .step-item.done:not(:last-child)::after { background: var(--primary); }
+    .step-circle {
+      width: 36px; height: 36px; border-radius: 50%; border: 2px solid var(--border);
+      background: var(--surface); display: flex; align-items: center; justify-content: center;
+      font-size: .8rem; font-weight: 700; color: var(--muted); z-index: 1; transition: all .3s;
+    }
+    .step-item.active .step-circle { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .step-item.done .step-circle   { border-color: var(--primary); background: var(--primary); color: #fff; }
+    .step-label {
+      font-size: .65rem; font-weight: 600; color: var(--muted);
+      margin-top: .4rem; text-align: center; letter-spacing: .03em; text-transform: uppercase;
+    }
+    .step-item.active .step-label,
+    .step-item.done .step-label { color: var(--primary); }
+
+    /* ── PROGRESS ── */
+    .progress-wrap { height: 4px; background: var(--border); border-radius: 99px; margin-bottom: 1.75rem; overflow: hidden; }
+    .progress-fill {
+      height: 100%; border-radius: 99px;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      transition: width .4s ease;
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 20px;
+      padding: 2.5rem 2rem; box-shadow: var(--shadow); animation: fadeUp .35s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    .step-title { font-size: 1.35rem; font-weight: 700; margin-bottom: .3rem; color: var(--text); }
+    .step-sub   { font-size: .85rem; color: var(--muted); margin-bottom: 1.75rem; }
+    .step-sub a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+    /* ── FIELDS ── */
+    .field { margin-bottom: 1.1rem; }
+    .field label { display: block; font-size: .8rem; font-weight: 600; margin-bottom: .35rem; color: var(--text); }
+    .field input, .field select {
+      width: 100%; padding: .7rem 1rem; border: 1.5px solid var(--border);
+      border-radius: var(--radius); font-family: 'Poppins', sans-serif; font-size: .88rem;
+      color: var(--text); background: var(--bg); outline: none;
+      transition: border-color .2s, box-shadow .2s; appearance: none;
+    }
+    .field input:focus, .field select:focus {
+      border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,.12); background: #fff;
+    }
+    .field select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 1rem center; padding-right: 2.5rem;
+    }
+    .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+
+    /* ── PASSWORD STRENGTH ── */
+    .sbar  { height: 4px; border-radius: 99px; background: var(--border); margin-top: .5rem; overflow: hidden; }
+    .sfill { height: 100%; width: 0; border-radius: 99px; background: #ef4444; transition: width .3s, background .3s; }
+    .slbl  { font-size: .7rem; color: var(--muted); margin-top: .3rem; }
+
+    /* ── AVATAR PREVIEW ── */
+    .avatar-preview { display: flex; flex-direction: column; align-items: center; gap: .75rem; margin-bottom: 1.5rem; }
+    .avatar {
+      width: 72px; height: 72px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; font-weight: 700; color: #fff;
+    }
+    .avatar-name { font-weight: 600; font-size: 1rem; }
+    .avatar-role { font-size: .8rem; color: var(--muted); }
+
+    /* ── TAGS ── */
+    .tags-wrap { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .tag {
+      display: inline-flex; align-items: center; gap: .3rem;
+      background: #ede9fe; color: var(--primary); border-radius: 999px;
+      padding: .3rem .8rem; font-size: .78rem; font-weight: 600;
+      cursor: pointer; transition: background .2s, color .2s;
+      border: none; font-family: 'Poppins', sans-serif;
+    }
+    .tag.active { background: var(--primary); color: #fff; }
+
+    /* ── PERKS ── */
+    .perks { display: flex; gap: .5rem; flex-wrap: wrap; margin-bottom: 1.5rem; }
+    .perk {
+      display: flex; align-items: center; gap: .3rem; background: #f0fdf4;
+      color: #166534; border-radius: 999px; padding: .25rem .75rem;
+      font-size: .75rem; font-weight: 600;
+    }
+
+    /* ── TERMS ── */
+    .terms-row { display: flex; align-items: flex-start; gap: .6rem; margin-bottom: 1.25rem; }
+    .terms-row input[type="checkbox"] { accent-color: var(--primary); width: 15px; height: 15px; flex-shrink: 0; margin-top: 2px; }
+    .terms-row label { font-size: .8rem; color: var(--muted); line-height: 1.5; }
+    .terms-row a { color: var(--primary); font-weight: 600; text-decoration: none; }
+
+    /* ── DIVIDER ── */
+    .divider { text-align: center; margin: 1.25rem 0; position: relative; color: var(--muted); font-size: .8rem; }
+    .divider::before, .divider::after { content: ''; position: absolute; top: 50%; width: 38%; height: 1px; background: var(--border); }
+    .divider::before { left: 0; } .divider::after { right: 0; }
+
+    /* ── GOOGLE BTN ── */
+    .btn-google {
+      width: 100%; display: flex; align-items: center; justify-content: center; gap: .6rem;
+      padding: .7rem; border: 1.5px solid var(--border); border-radius: var(--radius);
+      background: #fff; font-family: 'Poppins', sans-serif; font-size: .87rem;
+      font-weight: 500; color: var(--text); cursor: pointer;
+      transition: border-color .2s, box-shadow .2s;
+    }
+    .btn-google:hover { border-color: var(--primary); box-shadow: 0 2px 8px rgba(79,70,229,.1); }
+
+    /* ── BUTTONS ── */
+    .btn-row { display: flex; gap: .75rem; margin-top: 1.5rem; }
+    .btn-back {
+      flex: 1; padding: .75rem; border: 1.5px solid var(--border); background: var(--surface);
+      border-radius: var(--radius); font-family: 'Poppins', sans-serif; font-size: .9rem;
+      font-weight: 600; color: var(--muted); cursor: pointer; transition: all .2s;
+    }
+    .btn-back:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-next {
+      flex: 2; padding: .75rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff; border: none; border-radius: var(--radius);
+      font-family: 'Poppins', sans-serif; font-size: .9rem; font-weight: 600;
+      cursor: pointer; transition: opacity .2s, transform .15s;
+    }
+    .btn-next:hover { opacity: .9; transform: translateY(-1px); }
+    .btn-next:only-child { flex: 1; }
+
+    /* ── SUCCESS ── */
+    .success-wrap { text-align: center; padding: 1rem 0; }
+    .check-circle {
+      width: 72px; height: 72px; border-radius: 50%; background: #f0fdf4;
+      margin: 0 auto 1.25rem; display: flex; align-items: center; justify-content: center;
+    }
+    .success-wrap h2 { font-size: 1.4rem; font-weight: 700; margin-bottom: .5rem; }
+    .success-wrap p  { font-size: .88rem; color: var(--muted); line-height: 1.7; }
+    .btn-go {
+      display: inline-block; margin-top: 1.5rem; padding: .75rem 2rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff; border-radius: var(--radius); font-family: 'Poppins', sans-serif;
+      font-size: .9rem; font-weight: 600; text-decoration: none; transition: opacity .2s;
+    }
+    .btn-go:hover { opacity: .9; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center; padding: 1.5rem;
+      font-size: .82rem; color: var(--muted); border-top: 1px solid var(--border);
+    }
+  </style>
+</head>
+<body>
+
+
+
+<!-- MAIN -->
+<main>
+  <div class="wrap">
+    <div class="stepper" id="stepper"></div>
+    <div class="progress-wrap"><div class="progress-fill" id="progFill"></div></div>
+    <div class="card" id="cardWrap"></div>
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 ICONNECT – Tous droits réservés</p>
+</footer>
+
+<script>
+  const STEPS = [
+    { label: 'Profil' },
+    { label: 'Sécurité' },
+    { label: 'Préférences' },
+    { label: 'Confirmation' },
+  ];
+
+  let current = 0;
+  const data = { prenom: '', nom: '', email: '', role: '', password: '', confirm: '', terms: false, interests: [] };
+
+  function renderStepper() {
+    document.getElementById('stepper').innerHTML = STEPS.map((s, i) => `
+      <div class="step-item ${i < current ? 'done' : i === current ? 'active' : ''}">
+        <div class="step-circle">${i < current ? '&#10003;' : i + 1}</div>
+        <div class="step-label">${s.label}</div>
+      </div>`).join('');
+    document.getElementById('progFill').style.width = ((current + 1) / STEPS.length * 100) + '%';
+  }
+
+  function renderCard() {
+    const w = document.getElementById('cardWrap');
+    w.style.animation = 'none';
+    setTimeout(() => { w.style.animation = 'fadeUp .35s ease both'; }, 10);
+    const views = [step0, step1, step2, step3, stepSuccess];
+    w.innerHTML = views[current]();
+    bindStep();
+    if (current === 1 && data.password) checkStrength(data.password);
+  }
+
+  function step0() {
+    return `
+      <div class="step-title">Qui êtes-vous ?</div>
+      <div class="step-sub">Commençons par vos informations de base. Déjà inscrit ? <a href="login.html">Se connecter</a></div>
+      <div class="row2">
+        <div class="field"><label>Prénom</label><input id="f_prenom" type="text" placeholder="Jean" value="${esc(data.prenom)}"></div>
+        <div class="field"><label>Nom</label><input id="f_nom" type="text" placeholder="Dupont" value="${esc(data.nom)}"></div>
+      </div>
+      <div class="field"><label>Adresse e-mail</label><input id="f_email" type="email" placeholder="vous@exemple.com" value="${esc(data.email)}"></div>
+      <div class="divider">ou</div>
+      <button type="button" class="btn-google">
+        <svg width="18" height="18" viewBox="0 0 24 24">
+          <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+          <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+          <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z" fill="#FBBC05"/>
+          <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+        </svg>
+        Continuer avec Google
+      </button>
+      <div class="btn-row"><button type="button" class="btn-next" id="btnNext">Suivant →</button></div>`;
+  }
+
+  function step1() {
+    return `
+      <div class="step-title">Sécurisez votre compte</div>
+      <div class="step-sub">Choisissez un mot de passe robuste pour protéger votre accès.</div>
+      <div class="field">
+        <label>Mot de passe</label>
+        <input type="password" id="f_pwd" placeholder="Min. 8 caractères" oninput="checkStrength(this.value)">
+        <div class="sbar"><div class="sfill" id="sfill"></div></div>
+        <div class="slbl" id="slbl">Entrez un mot de passe</div>
+      </div>
+      <div class="field">
+        <label>Confirmer le mot de passe</label>
+        <input type="password" id="f_conf" placeholder="Répétez le mot de passe">
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-back" id="btnBack">← Retour</button>
+        <button type="button" class="btn-next" id="btnNext">Suivant →</button>
+      </div>`;
+  }
+
+  function step2() {
+    const opts = ['Étudiant', 'Professionnel', 'Enseignant', 'Autre'];
+    const tags  = ['Design', 'Dev web', 'Marketing', 'Data', 'IA', 'Langues', 'Finance', 'Management'];
+    return `
+      <div class="step-title">Votre profil</div>
+      <div class="step-sub">Personnalisez votre expérience ICONNECT.</div>
+      <div class="field">
+        <label>Je suis…</label>
+        <select id="f_role">
+          <option value="" ${!data.role ? 'selected' : ''} disabled>Choisir un profil</option>
+          ${opts.map(o => `<option value="${o}" ${data.role === o ? 'selected' : ''}>${o}</option>`).join('')}
+        </select>
+      </div>
+      <div style="margin-bottom:1rem">
+        <div style="font-size:.8rem;font-weight:600;margin-bottom:.6rem;color:var(--text)">Centres d'intérêt</div>
+        <div class="tags-wrap">
+          ${tags.map(t => `<button type="button" class="tag ${data.interests.includes(t) ? 'active' : ''}" onclick="toggleTag(this,'${t}')">${t}</button>`).join('')}
+        </div>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-back" id="btnBack">← Retour</button>
+        <button type="button" class="btn-next" id="btnNext">Suivant →</button>
+      </div>`;
+  }
+
+  function step3() {
+    const initials = ((data.prenom[0] || '') + (data.nom[0] || '')).toUpperCase() || '?';
+    return `
+      <div class="step-title">Confirmez vos informations</div>
+      <div class="step-sub">Vérifiez avant de créer votre compte.</div>
+      <div class="avatar-preview">
+        <div class="avatar">${initials}</div>
+        <div class="avatar-name">${esc(data.prenom)} ${esc(data.nom)}</div>
+        <div class="avatar-role">${esc(data.role || '—')} · ${esc(data.email)}</div>
+      </div>
+      <div class="perks">
+        <span class="perk">✔ Accès illimité</span>
+        <span class="perk">✔ Certificats inclus</span>
+        <span class="perk">✔ Sans engagement</span>
+      </div>
+      <div class="terms-row">
+        <input type="checkbox" id="f_terms" ${data.terms ? 'checked' : ''}>
+        <label for="f_terms">J'accepte les <a href="#">Conditions d'utilisation</a> et la <a href="#">Politique de confidentialité</a> d'ICONNECT.</label>
+      </div>
+      <div class="btn-row">
+        <button type="button" class="btn-back" id="btnBack">← Retour</button>
+        <button type="button" class="btn-next" id="btnNext">Créer mon compte</button>
+      </div>`;
+  }
+
+  function stepSuccess() {
+    return `
+      <div class="success-wrap">
+        <div class="check-circle">
+          <svg width="36" height="36" viewBox="0 0 36 36" fill="none">
+            <circle cx="18" cy="18" r="18" fill="#dcfce7"/>
+            <path d="M10 18l6 6 10-12" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <h2>Bienvenue, ${esc(data.prenom)} !</h2>
+        <p>Votre compte ICONNECT a été créé avec succès.<br>Vous pouvez maintenant accéder à tous vos cours.</p>
+        <a href="login.html" class="btn-go">Accéder à mon espace →</a>
+      </div>`;
+  }
+
+  function checkStrength(val) {
+    const fill  = document.getElementById('sfill');
+    const label = document.getElementById('slbl');
+    if (!fill) return;
+    let s = 0;
+    if (val.length >= 8)          s++;
+    if (/[A-Z]/.test(val))        s++;
+    if (/[0-9]/.test(val))        s++;
+    if (/[^A-Za-z0-9]/.test(val)) s++;
+    const levels = [
+      { w: '20%',  c: '#ef4444', t: 'Très faible' },
+      { w: '40%',  c: '#f97316', t: 'Faible' },
+      { w: '65%',  c: '#eab308', t: 'Moyen' },
+      { w: '100%', c: '#22c55e', t: 'Fort 🔒' },
+    ];
+    const lvl = levels[Math.max(s - 1, 0)];
+    fill.style.width      = val ? lvl.w : '0%';
+    fill.style.background = lvl.c;
+    label.textContent     = val ? lvl.t : 'Entrez un mot de passe';
+    label.style.color     = val ? lvl.c : 'var(--muted)';
+  }
+
+  function toggleTag(el, tag) {
+    const idx = data.interests.indexOf(tag);
+    if (idx > -1) { data.interests.splice(idx, 1); el.classList.remove('active'); }
+    else           { data.interests.push(tag);      el.classList.add('active');    }
+  }
+
+  function esc(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function bindStep() {
+    const next = document.getElementById('btnNext');
+    const back = document.getElementById('btnBack');
+
+    if (back) back.onclick = () => { current--; renderStepper(); renderCard(); };
+
+    if (next) next.onclick = () => {
+      if (current === 0) {
+        data.prenom = document.getElementById('f_prenom').value.trim();
+        data.nom    = document.getElementById('f_nom').value.trim();
+        data.email  = document.getElementById('f_email').value.trim();
+        if (!data.prenom || !data.nom || !data.email) { alert('Veuillez remplir tous les champs.'); return; }
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) { alert('Adresse e-mail invalide.'); return; }
+      }
+      if (current === 1) {
+        data.password = document.getElementById('f_pwd').value;
+        data.confirm  = document.getElementById('f_conf').value;
+        if (data.password.length < 8) { alert('Le mot de passe doit contenir au moins 8 caractères.'); return; }
+        if (data.password !== data.confirm) { alert('Les mots de passe ne correspondent pas.'); return; }
+      }
+      if (current === 2) {
+        data.role = document.getElementById('f_role').value;
+      }
+      if (current === 3) {
+        data.terms = document.getElementById('f_terms').checked;
+        if (!data.terms) { alert("Veuillez accepter les conditions d'utilisation."); return; }
+      }
+      current++;
+      renderStepper();
+      renderCard();
+    };
+  }
+
+  renderStepper();
+  renderCard();
+</script>
+
+</body>
+</html>

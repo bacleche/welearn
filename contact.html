@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Contact - ICONNECT</title>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  
+</head>
+<body>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="logo">
+      <img src="iconnect.png" alt="Logo ICONNECT" class="logo-img">
+    </div>
+
+  <!-- BURGER -->
+   <div class="overlay" id="overlay"></div>
+  <div class="burger" id="burger">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+
+  <ul class="nav-links" id="navLinks">
+    <li><a href="index.html">Accueil</a></li>
+    <li><a href="about.html">À propos</a></li>
+    <li><a href="courses.html">Cours</a></li>
+    <li><a href="contact.html">Contact</a></li>
+  </ul>
+
+  <div class="auth-buttons">
+    <a href="login.html" class="btn-outline">Connexion</a>
+    <a href="register.html" class="btn-primary">S'inscrire</a>
+  </div>
+</nav>
+
+
+<!-- ── HERO ── -->
+<div class="contact-hero">
+  <div class="hero-tag">On vous répond sous 24h</div>
+  <h1>Contactez-nous</h1>
+</div>
+
+<!-- ── BODY ── -->
+<div class="contact-body">
+
+  <!-- LEFT -->
+  <div class="contact-info">
+
+    <div class="info-card reveal rd1">
+      <div class="info-card-top">
+        <div class="info-icon">📧</div>
+        <h4>Email</h4>
+      </div>
+      <p><a href="mailto:contact@iconnect.io">contact@iconnect.io</a></p>
+      <p><a href="mailto:support@iconnect.io">support@iconnect.io</a></p>
+    </div>
+
+    <div class="info-card reveal rd2">
+      <div class="info-card-top">
+        <div class="info-icon">📞</div>
+        <h4>Téléphone</h4>
+      </div>
+      <p><a href="tel:+242060000000">+242 06 000 00 00</a></p>
+      <p style="margin-top:4px;font-size:0.78rem;color:rgba(255,255,255,0.3)">Lun – Ven, 8h – 18h</p>
+    </div>
+
+    <div class="info-card reveal rd3">
+      <div class="info-card-top">
+        <div class="info-icon">📍</div>
+        <h4>Adresse</h4>
+      </div>
+      <p>Avenue de l'Indépendance<br>Pointe-Noire, République du Congo</p>
+    </div>
+
+    <div class="socials-card reveal">
+      <h4>Réseaux sociaux</h4>
+      <div class="social-links">
+        <a href="#" class="social-btn">𝕏 Twitter</a>
+        <a href="#" class="social-btn">in LinkedIn</a>
+        <a href="#" class="social-btn">▶ YouTube</a>
+        <a href="#" class="social-btn">📸 Instagram</a>
+      </div>
+    </div>
+
+    <div class="hours-card reveal">
+      <h4>Horaires d'ouverture</h4>
+      <div class="hours-row">
+        <span>Lundi – Vendredi <span class="badge-open">Ouvert</span></span>
+        <span>8h – 18h</span>
+      </div>
+      <div class="hours-row">
+        <span>Samedi</span>
+        <span>9h – 13h</span>
+      </div>
+      <div class="hours-row">
+        <span>Dimanche</span>
+        <span style="color:rgba(255,100,100,0.6)">Fermé</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- RIGHT — FORM -->
+  <div class="contact-form-wrap reveal rd1">
+    <div class="form-header">
+      <h3>Envoyez-nous un message</h3>
+      <p>Tous les champs marqués d'un <span style="color:var(--orange)">*</span> sont obligatoires.</p>
+    </div>
+
+    <div class="success-banner" id="successBanner">
+      <div class="success-icon">✓</div>
+      <div>
+        <strong style="color:white;display:block;margin-bottom:2px">Message envoyé !</strong>
+        Notre équipe vous répondra sous 24h.
+      </div>
+    </div>
+
+    <form id="contactForm" novalidate>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Prénom <span>*</span></label>
+          <input type="text" placeholder="Jean" required>
+        </div>
+        <div class="form-group">
+          <label>Nom <span>*</span></label>
+          <input type="text" placeholder="Dupont" required>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Adresse email <span>*</span></label>
+        <input type="email" placeholder="jean@exemple.com" required>
+      </div>
+
+      <div class="form-group">
+        <label>Sujet <span>*</span></label>
+        <select required>
+          <option value="" disabled selected>Choisir un sujet…</option>
+          <option>Renseignement sur une formation</option>
+          <option>Problème technique</option>
+          <option>Facturation / Paiement</option>
+          <option>Partenariat</option>
+          <option>Autre</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Message <span>*</span></label>
+        <textarea placeholder="Décrivez votre demande en détail…" required></textarea>
+      </div>
+
+      <div class="form-footer">
+        <span class="form-note">🔒 Vos données sont protégées et ne seront jamais partagées.</span>
+        <button type="submit" class="btn-submit">
+          Envoyer le message
+          <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"/>
+          </svg>
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- MAP STRIP -->
+<div class="map-strip reveal">
+  <div class="map-strip-inner">
+    <div class="map-info">
+      <div class="map-dot"></div>
+      <div>
+        <strong>ICONNECT — Siège principal</strong>
+        <p>Avenue de l'Indépendance, Pointe-Noire, Congo</p>
+      </div>
+    </div>
+    <div class="map-divider"></div>
+    <div class="map-info">
+      <div style="font-size:1.4rem">🚌</div>
+      <div>
+        <strong>Accès</strong>
+        <p>Bus ligne 4 · Arrêt Centre-ville</p>
+      </div>
+    </div>
+    <div class="map-divider"></div>
+    <div class="map-info">
+      <div style="font-size:1.4rem">🅿️</div>
+      <div>
+        <strong>Parking</strong>
+        <p>Parking gratuit sur place</p>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="script.js"></script>
+
+<footer>
+  <p>© 2026 ICONNECT | MonarK — Tous droits réservés</p>
+</footer>
+
+
+
+</body>
+</html>

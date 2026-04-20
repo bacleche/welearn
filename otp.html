@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ICONNECT Learning – Vérification OTP</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+ <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary:   #4f46e5;
+      --primary-d: #3730a3;
+      --accent:    #06b6d4;
+      --bg:        #f8faff;
+      --surface:   #ffffff;
+      --text:      #1e1b4b;
+      --muted:     #6b7280;
+      --border:    #e0e7ff;
+      --radius:    12px;
+      --shadow:    0 8px 32px rgba(79,70,229,.12);
+      --err:       #ef4444;
+      --ok:        #22c55e;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── NAVBAR ── */
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem 5%;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .logo { font-size: 1.4rem; font-weight: 700; color: var(--primary); letter-spacing: .05em; }
+    .nav-links { list-style: none; display: flex; gap: 2rem; }
+    .nav-links a { text-decoration: none; color: var(--muted); font-weight: 500; font-size: .9rem; transition: color .2s; }
+    .nav-links a:hover { color: var(--primary); }
+    .auth-buttons { display: flex; gap: .75rem; align-items: center; }
+    .btn-outline {
+      padding: .5rem 1.2rem; border: 2px solid var(--primary); color: var(--primary);
+      border-radius: var(--radius); text-decoration: none; font-weight: 600; font-size: .85rem; transition: all .2s;
+    }
+    .btn-outline:hover { background: var(--primary); color: #fff; }
+    .btn-primary-nav {
+      padding: .5rem 1.2rem; background: var(--primary); color: #fff; border: none;
+      border-radius: var(--radius); text-decoration: none; font-weight: 600; font-size: .85rem;
+      cursor: pointer; transition: background .2s, transform .15s;
+    }
+    .btn-primary-nav:hover { background: var(--primary-d); transform: translateY(-1px); }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4rem 1rem;
+      background:
+        radial-gradient(ellipse at 20% 50%, rgba(79,70,229,.08) 0%, transparent 60%),
+        radial-gradient(ellipse at 80% 20%, rgba(6,182,212,.07) 0%, transparent 50%),
+        var(--bg);
+    }
+
+    /* ── CARD ── */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.75rem 2.25rem;
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow);
+      animation: fadeUp .45s ease both;
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── ICON ── */
+    .icon-wrap {
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #ede9fe, #e0f2fe);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 1.5rem;
+    }
+    .icon-wrap svg { width: 30px; height: 30px; }
+
+    /* ── HEADER TEXT ── */
+    .card h1 {
+      text-align: center;
+      font-size: 1.4rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: .4rem;
+    }
+    .card .sub {
+      text-align: center;
+      font-size: .84rem;
+      color: var(--muted);
+      line-height: 1.55;
+      margin-bottom: .5rem;
+    }
+    .email-badge {
+      display: block;
+      width: fit-content;
+      margin: 0 auto 2rem;
+      background: #ede9fe;
+      color: var(--primary-d);
+      border-radius: 999px;
+      padding: .25rem .9rem;
+      font-size: .8rem;
+      font-weight: 600;
+    }
+
+    /* ── OTP INPUTS ── */
+    .otp-row {
+      display: flex;
+      justify-content: center;
+      gap: .65rem;
+      margin-bottom: 1.1rem;
+    }
+    .otp-input {
+      width: 54px;
+      height: 62px;
+      border: 2px solid var(--border);
+      border-radius: var(--radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: var(--text);
+      background: var(--bg);
+      text-align: center;
+      outline: none;
+      transition: border-color .2s, box-shadow .2s, transform .15s;
+      -moz-appearance: textfield;
+      caret-color: var(--primary);
+    }
+    .otp-input::-webkit-outer-spin-button,
+    .otp-input::-webkit-inner-spin-button { appearance: none; }
+    .otp-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79,70,229,.14);
+      background: #fff;
+      transform: translateY(-2px);
+    }
+    .otp-input.filled  { border-color: var(--primary); background: #fff; }
+    .otp-input.error   { border-color: var(--err); box-shadow: 0 0 0 3px rgba(239,68,68,.13); animation: shake .35s ease; }
+    .otp-input.success { border-color: var(--ok); box-shadow: 0 0 0 3px rgba(34,197,94,.13); }
+
+    @keyframes shake {
+      0%,100% { transform: translateX(0); }
+      20%      { transform: translateX(-5px); }
+      60%      { transform: translateX(5px); }
+    }
+
+    /* ── MESSAGE ── */
+    .msg {
+      text-align: center;
+      font-size: .8rem;
+      font-weight: 600;
+      min-height: 1.2rem;
+      margin-bottom: 1.25rem;
+      transition: color .3s;
+    }
+    .msg.error   { color: var(--err); }
+    .msg.success { color: var(--ok); }
+    .msg.info    { color: var(--muted); }
+
+    /* ── VERIFY BUTTON ── */
+    .btn-verify {
+      width: 100%;
+      padding: .88rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff;
+      border: none;
+      border-radius: var(--radius);
+      font-family: 'Poppins', sans-serif;
+      font-size: .95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity .2s, transform .15s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .5rem;
+    }
+    .btn-verify:hover:not(:disabled) { opacity: .9; transform: translateY(-1px); }
+    .btn-verify:disabled { opacity: .45; cursor: not-allowed; transform: none; }
+
+    /* ── TIMER & RESEND ── */
+    .timer-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .4rem;
+      margin-top: 1.25rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .timer-num {
+      font-weight: 700;
+      color: var(--primary);
+      min-width: 30px;
+      text-align: center;
+      font-variant-numeric: tabular-nums;
+    }
+    .btn-resend {
+      background: none;
+      border: none;
+      font-family: 'Poppins', sans-serif;
+      font-size: .82rem;
+      font-weight: 700;
+      color: var(--primary);
+      cursor: pointer;
+      padding: 0;
+      display: none;
+      transition: opacity .2s;
+    }
+    .btn-resend:hover { opacity: .7; }
+    .btn-resend.visible { display: inline; }
+
+    /* ── ATTEMPTS ── */
+    .attempts {
+      text-align: center;
+      font-size: .75rem;
+      color: var(--muted);
+      margin-top: .85rem;
+    }
+    .dot-row {
+      display: flex;
+      justify-content: center;
+      gap: .45rem;
+      margin-top: .45rem;
+    }
+    .dot {
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: var(--border);
+      transition: background .3s;
+    }
+    .dot.used { background: var(--err); }
+
+    /* ── BACK LINK ── */
+    .back-link {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: .3rem;
+      margin-top: 1.5rem;
+      font-size: .8rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 500;
+      transition: color .2s;
+    }
+    .back-link:hover { color: var(--primary); }
+
+    /* ── SUCCESS STATE ── */
+    .success-view { display: none; text-align: center; animation: fadeUp .4s ease both; }
+    .success-view.show { display: block; }
+    .check-big {
+      width: 76px; height: 76px; border-radius: 50%; background: #f0fdf4;
+      margin: 0 auto 1.25rem; display: flex; align-items: center; justify-content: center;
+    }
+    .success-view h2 { font-size: 1.3rem; font-weight: 700; margin-bottom: .4rem; }
+    .success-view p  { font-size: .85rem; color: var(--muted); line-height: 1.65; }
+    .redirect-bar-wrap { margin-top: 1.5rem; height: 5px; background: var(--border); border-radius: 99px; overflow: hidden; }
+    .redirect-bar {
+      height: 100%; width: 0%;
+      background: linear-gradient(90deg, var(--primary), var(--accent));
+      border-radius: 99px;
+      transition: width 3s linear;
+    }
+    .redirect-label { font-size: .75rem; color: var(--muted); margin-top: .5rem; }
+    .btn-go {
+      display: inline-block; margin-top: 1.5rem; padding: .75rem 2rem;
+      background: linear-gradient(135deg, var(--primary), var(--accent));
+      color: #fff; border-radius: var(--radius); font-family: 'Poppins', sans-serif;
+      font-size: .9rem; font-weight: 600; text-decoration: none; transition: opacity .2s;
+    }
+    .btn-go:hover { opacity: .9; }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 1.5rem;
+      font-size: .82rem;
+      color: var(--muted);
+      border-top: 1px solid var(--border);
+    }
+  </style>
+<body>
+
+
+
+<!-- MAIN -->
+<main>
+  <div class="card" id="card">
+
+    <!-- ICON -->
+    <div class="icon-wrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#4f46e5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="2" y="4" width="20" height="16" rx="3"/>
+        <path d="M2 8l10 6 10-6"/>
+      </svg>
+    </div>
+
+    <!-- MAIN CONTENT -->
+    <div id="mainContent">
+      <h1>Vérification OTP</h1>
+      <p class="sub">Un code à 6 chiffres a été envoyé à votre adresse e-mail</p>
+      <span class="email-badge" id="emailBadge">j.dupont@exemple.com</span>
+
+      <!-- OTP INPUTS -->
+      <div class="otp-row" id="otpRow">
+        <input class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d0" autocomplete="one-time-code">
+        <input class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d1">
+        <input class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d2">
+        <input class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d3">
+        <input class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d4">
+        <input class="otp-input" maxlength="1" inputmode="numeric" pattern="[0-9]" id="d5">
+      </div>
+
+      <!-- MESSAGE -->
+      <div class="msg info" id="msg">Entrez le code reçu par e-mail</div>
+
+      <!-- VERIFY BUTTON -->
+      <button class="btn-verify" id="btnVerify" disabled>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        Vérifier le code
+      </button>
+
+      <!-- TIMER -->
+      <div class="timer-row">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
+          <circle cx="12" cy="12" r="10"/>
+          <polyline points="12 6 12 12 16 14"/>
+        </svg>
+        <span id="timerText">Renvoyer dans</span>
+        <span class="timer-num" id="timerNum">30s</span>
+        <button class="btn-resend" id="btnResend">Renvoyer le code</button>
+      </div>
+
+      <!-- ATTEMPTS -->
+      <div class="attempts">
+        <span id="attemptsLabel">3 tentatives restantes</span>
+        <div class="dot-row">
+          <div class="dot" id="dot0"></div>
+          <div class="dot" id="dot1"></div>
+          <div class="dot" id="dot2"></div>
+        </div>
+      </div>
+
+      <!-- BACK LINK -->
+      <a href="login.html" class="back-link">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6"/>
+        </svg>
+        Retour à la connexion
+      </a>
+    </div>
+
+    <!-- SUCCESS STATE -->
+    <div class="success-view" id="successView">
+      <div class="check-big">
+        <svg width="40" height="40" viewBox="0 0 40 40" fill="none">
+          <circle cx="20" cy="20" r="20" fill="#dcfce7"/>
+          <path d="M11 20l7 7 11-14" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+      </div>
+      <h2>Compte vérifié !</h2>
+      <p>Votre identité a été confirmée avec succès.<br>Vous allez être redirigé vers votre espace.</p>
+      <div class="redirect-bar-wrap">
+        <div class="redirect-bar" id="redirectBar"></div>
+      </div>
+      <p class="redirect-label">Redirection en cours…</p>
+      <a href="index.html" class="btn-go">Accéder à mon espace →</a>
+    </div>
+
+  </div>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <p>© 2026 ICONNECT – Tous droits réservés</p>
+</footer>
+
+<script>
+  /* ── CONFIG ── */
+  const SECRET   = '472591'; /* Remplacer par la vérification backend */
+  const MAX_TRIES = 3;
+  const TIMER_SEC = 30;
+
+  /* ── REFS ── */
+  const inputs      = Array.from({ length: 6 }, (_, i) => document.getElementById('d' + i));
+  const btnVerify   = document.getElementById('btnVerify');
+  const msgEl       = document.getElementById('msg');
+  const timerNumEl  = document.getElementById('timerNum');
+  const timerTextEl = document.getElementById('timerText');
+  const btnResend   = document.getElementById('btnResend');
+  const mainContent = document.getElementById('mainContent');
+  const successView = document.getElementById('successView');
+
+  let attempts = MAX_TRIES;
+  let timerVal = TIMER_SEC;
+  let timerInt = null;
+
+  /* ── HELPERS ── */
+  function getCode() { return inputs.map(i => i.value).join(''); }
+
+  function setMsg(text, type) {
+    msgEl.textContent = text;
+    msgEl.className   = 'msg ' + type;
+  }
+
+  function setInputsState(state) {
+    inputs.forEach(inp => {
+      inp.classList.remove('error', 'success');
+      if (state) inp.classList.add(state);
+    });
+  }
+
+  function updateDots() {
+    [0, 1, 2].forEach(i => {
+      document.getElementById('dot' + i).classList.toggle('used', i >= attempts);
+    });
+    const label = attempts === 0
+      ? 'Aucune tentative restante'
+      : attempts + ' tentative' + (attempts > 1 ? 's' : '') + ' restante' + (attempts > 1 ? 's' : '');
+    document.getElementById('attemptsLabel').textContent = label;
+  }
+
+  /* ── TIMER ── */
+  function startTimer() {
+    clearInterval(timerInt);
+    timerVal = TIMER_SEC;
+    timerNumEl.style.display  = 'inline';
+    timerTextEl.style.display = 'inline';
+    btnResend.classList.remove('visible');
+    timerInt = setInterval(() => {
+      timerVal--;
+      timerNumEl.textContent = timerVal + 's';
+      if (timerVal <= 0) {
+        clearInterval(timerInt);
+        timerNumEl.style.display  = 'none';
+        timerTextEl.style.display = 'none';
+        btnResend.classList.add('visible');
+      }
+    }, 1000);
+  }
+
+  /* ── INPUT EVENTS ── */
+  inputs.forEach((inp, i) => {
+    inp.addEventListener('input', () => {
+      inp.value = inp.value.replace(/[^0-9]/g, '').slice(-1);
+      inp.classList.toggle('filled', inp.value !== '');
+      if (inp.value && i < 5) inputs[i + 1].focus();
+      const code = getCode();
+      btnVerify.disabled = code.length < 6;
+      if (code.length < 6) { setMsg('Entrez le code reçu par e-mail', 'info'); setInputsState(''); }
+    });
+
+    inp.addEventListener('keydown', e => {
+      if (e.key === 'Backspace' && !inp.value && i > 0) {
+        inputs[i - 1].value = '';
+        inputs[i - 1].classList.remove('filled');
+        inputs[i - 1].focus();
+      }
+      if (e.key === 'ArrowLeft'  && i > 0) inputs[i - 1].focus();
+      if (e.key === 'ArrowRight' && i < 5) inputs[i + 1].focus();
+      if (e.key === 'Enter' && !btnVerify.disabled) btnVerify.click();
+    });
+
+    inp.addEventListener('paste', e => {
+      e.preventDefault();
+      const pasted = (e.clipboardData || window.clipboardData)
+        .getData('text').replace(/\D/g, '').slice(0, 6);
+      pasted.split('').forEach((ch, j) => {
+        if (inputs[j]) { inputs[j].value = ch; inputs[j].classList.add('filled'); }
+      });
+      inputs[Math.min(pasted.length, 5)].focus();
+      btnVerify.disabled = getCode().length < 6;
+    });
+  });
+
+  /* ── VERIFY ── */
+  btnVerify.addEventListener('click', () => {
+    const code = getCode();
+    if (code === SECRET) {
+      setInputsState('success');
+      setMsg('Code correct !', 'success');
+      btnVerify.disabled = true;
+      clearInterval(timerInt);
+      setTimeout(() => {
+        mainContent.style.display = 'none';
+        successView.classList.add('show');
+        setTimeout(() => { document.getElementById('redirectBar').style.width = '100%'; }, 60);
+        setTimeout(() => { window.location.href = 'index.html'; }, 3200);
+      }, 700);
+    } else {
+      attempts--;
+      updateDots();
+      setInputsState('error');
+      if (attempts > 0) {
+        setMsg('Code incorrect — ' + attempts + ' tentative' + (attempts > 1 ? 's' : '') + ' restante' + (attempts > 1 ? 's' : ''), 'error');
+        setTimeout(() => {
+          setInputsState('');
+          inputs.forEach(inp => { inp.value = ''; inp.classList.remove('filled'); });
+          inputs[0].focus();
+          btnVerify.disabled = true;
+          setMsg('Entrez le code reçu par e-mail', 'info');
+        }, 900);
+      } else {
+        setMsg('Trop de tentatives. Renvoyez un nouveau code.', 'error');
+        inputs.forEach(inp => inp.disabled = true);
+        btnVerify.disabled = true;
+        clearInterval(timerInt);
+        timerNumEl.style.display  = 'none';
+        timerTextEl.style.display = 'none';
+        btnResend.classList.add('visible');
+      }
+    }
+  });
+
+  /* ── RESEND ── */
+  btnResend.addEventListener('click', () => {
+    attempts = MAX_TRIES;
+    updateDots();
+    inputs.forEach(inp => {
+      inp.value = '';
+      inp.disabled = false;
+      inp.classList.remove('filled', 'error', 'success');
+    });
+    btnVerify.disabled = true;
+    setMsg('Nouveau code envoyé avec succès !', 'success');
+    setTimeout(() => setMsg('Entrez le code reçu par e-mail', 'info'), 2500);
+    startTimer();
+    inputs[0].focus();
+  });
+
+  /* ── INIT ── */
+  startTimer();
+  inputs[0].focus();
+</script>
+
+</body>
+</html>

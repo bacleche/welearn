@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ICONNECT – Espace Enseignant</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4f46e5;--primary-d:#3730a3;--primary-l:#ede9fe;
+  --accent:#06b6d4;--accent-l:#cffafe;
+  --success:#10b981;--warning:#f59e0b;--danger:#ef4444;
+  --bg:#f8faff;--surface:#ffffff;--text:#1e1b4b;--muted:#6b7280;
+  --border:#e0e7ff;--radius:12px;--shadow:0 8px 32px rgba(79,70,229,.12);
+}
+body{font-family:'Poppins',sans-serif;background:var(--bg);color:var(--text);display:flex;min-height:100vh}
+
+/* SIDEBAR */
+.sidebar{width:260px;min-height:100vh;background:var(--surface);border-right:1px solid var(--border);display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;z-index:50;overflow-y:auto}
+.sidebar-logo{padding:1.75rem 1.5rem 1.25rem;border-bottom:1px solid var(--border)}
+.logo-text{font-size:1.5rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.logo-sub{font-size:.7rem;color:var(--muted);font-weight:500;letter-spacing:.08em;text-transform:uppercase}
+.sidebar-user{display:flex;align-items:center;gap:.85rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.avatar{width:42px;height:42px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--primary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.9rem;flex-shrink:0}
+.user-name{font-size:.88rem;font-weight:600;color:var(--text)}
+.badge-role{display:inline-block;background:var(--accent-l);color:#0e7490;font-size:.65rem;font-weight:700;padding:.15rem .5rem;border-radius:999px;text-transform:uppercase;letter-spacing:.05em;margin-top:.2rem}
+nav{flex:1;padding:1rem 0}
+.nav-section{padding:.5rem 1.5rem .25rem;font-size:.62rem;font-weight:700;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:.75rem;padding:.65rem 1.5rem;margin:.1rem .75rem;border-radius:var(--radius);cursor:pointer;transition:all .2s;color:var(--muted);font-size:.875rem;font-weight:500}
+.nav-item:hover{background:var(--primary-l);color:var(--primary)}
+.nav-item.active{background:var(--primary);color:#fff;font-weight:600}
+.nav-item .icon{font-size:1.05rem;width:22px;text-align:center}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:.62rem;font-weight:700;padding:.15rem .45rem;border-radius:999px}
+.sidebar-footer{padding:1.25rem 1.5rem;border-top:1px solid var(--border)}
+.logout-btn{display:flex;align-items:center;gap:.75rem;color:var(--muted);font-size:.875rem;cursor:pointer;transition:color .2s}
+.logout-btn:hover{color:var(--danger)}
+
+/* MAIN */
+.main{margin-left:260px;flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:1rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:40}
+.topbar-title{font-size:1.1rem;font-weight:700;color:var(--text)}
+.topbar-title span{color:var(--primary)}
+.topbar-right{display:flex;align-items:center;gap:.75rem}
+.btn-create{display:flex;align-items:center;gap:.5rem;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;padding:.5rem 1.2rem;border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-create:hover{opacity:.88}
+.icon-btn{width:36px;height:36px;border-radius:var(--radius);background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.95rem;position:relative;transition:all .2s}
+.icon-btn:hover{border-color:var(--primary);background:var(--primary-l)}
+.notif-dot{position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:2px solid var(--surface)}
+.content{flex:1;padding:2rem;overflow-y:auto}
+
+/* PAGE SYSTEM */
+.page{display:none}.page.active{display:block}
+
+/* SHARED */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.25rem}
+.card-title{font-size:1rem;font-weight:700;color:var(--text)}
+.card-action{font-size:.8rem;color:var(--primary);font-weight:600;cursor:pointer;background:none;border:none;font-family:'Poppins',sans-serif}
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.2rem;border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;border:none;transition:all .2s}
+.btn-primary{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
+.btn-primary:hover{opacity:.88}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-outline:hover{border-color:var(--primary);color:var(--primary)}
+.btn-danger{background:#fee2e2;color:var(--danger);border:none}
+.btn-danger:hover{background:var(--danger);color:#fff}
+.status-badge{padding:.25rem .75rem;border-radius:999px;font-size:.7rem;font-weight:700;white-space:nowrap}
+.sb-pub{background:#d1fae5;color:var(--success)}
+.sb-draft{background:#fef3c7;color:var(--warning)}
+.sb-review{background:var(--primary-l);color:var(--primary)}
+.page-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.75rem}
+.page-title{font-size:1.4rem;font-weight:800;color:var(--text)}
+.page-title span{color:var(--primary)}
+.t-avatar{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;color:#fff;flex-shrink:0}
+
+/* ============ PAGE 1: DASHBOARD ============ */
+.welcome-banner{background:linear-gradient(135deg,#0e7490 0%,var(--accent) 50%,var(--primary) 100%);border-radius:20px;padding:2rem 2.5rem;margin-bottom:2rem;color:#fff;display:flex;align-items:center;justify-content:space-between;position:relative;overflow:hidden}
+.welcome-banner::before{content:'';position:absolute;right:-40px;top:-40px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.08)}
+.welcome-text h2{font-size:1.4rem;font-weight:700;margin-bottom:.35rem}
+.welcome-text p{font-size:.88rem;opacity:.85}
+.welcome-actions{display:flex;gap:.75rem;z-index:1}
+.wbtn{background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.3);color:#fff;padding:.55rem 1.1rem;border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.8rem;font-weight:600;cursor:pointer;transition:background .2s;white-space:nowrap}
+.wbtn:hover{background:rgba(255,255,255,.3)}
+.wbtn.solid{background:rgba(255,255,255,.9);color:var(--primary)}
+.stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;display:flex;flex-direction:column;gap:.5rem;position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s}
+.stat-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.stat-card:nth-child(1)::before{background:linear-gradient(90deg,var(--primary),var(--accent))}
+.stat-card:nth-child(2)::before{background:linear-gradient(90deg,var(--success),#34d399)}
+.stat-card:nth-child(3)::before{background:linear-gradient(90deg,var(--warning),#fcd34d)}
+.stat-card:nth-child(4)::before{background:linear-gradient(90deg,var(--danger),#f87171)}
+.stat-icon{width:44px;height:44px;border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:1.2rem}
+.stat-icon.purple{background:var(--primary-l)}.stat-icon.green{background:#d1fae5}.stat-icon.yellow{background:#fef3c7}.stat-icon.red{background:#fee2e2}
+.stat-value{font-size:1.75rem;font-weight:800;color:var(--text);line-height:1}
+.stat-label{font-size:.78rem;color:var(--muted);font-weight:500}
+.stat-change{font-size:.72rem;font-weight:600}
+.stat-change.up{color:var(--success)}.stat-change.down{color:var(--danger)}
+.two-col{display:grid;grid-template-columns:1.5fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.course-row{display:grid;grid-template-columns:1fr auto auto auto;align-items:center;gap:1rem;padding:.85rem 0;border-bottom:1px solid var(--border)}
+.course-row:last-child{border-bottom:none;padding-bottom:0}
+.course-info-col{display:flex;align-items:center;gap:.85rem}
+.course-thumb{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.3rem;flex-shrink:0}
+.t1{background:linear-gradient(135deg,#ede9fe,#c4b5fd)}.t2{background:linear-gradient(135deg,#cffafe,#a5f3fc)}.t3{background:linear-gradient(135deg,#d1fae5,#6ee7b7)}.t4{background:linear-gradient(135deg,#fee2e2,#fca5a5)}
+.cn{font-size:.88rem;font-weight:600;color:var(--text)}.cm{font-size:.73rem;color:var(--muted);margin-top:.1rem}
+.students-count{text-align:center}.sc-val{font-size:.95rem;font-weight:700;color:var(--text)}.sc-lbl{font-size:.68rem;color:var(--muted)}
+.action-dots{background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--muted);padding:.25rem}
+.student-row{display:flex;align-items:center;gap:.85rem;padding:.7rem 0;border-bottom:1px solid var(--border)}
+.student-row:last-child{border-bottom:none}
+.s-avatar{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.75rem;font-weight:700;color:#fff;flex-shrink:0}
+.s-a1{background:linear-gradient(135deg,var(--primary),var(--accent))}.s-a2{background:linear-gradient(135deg,var(--success),#34d399)}.s-a3{background:linear-gradient(135deg,var(--warning),#fcd34d)}.s-a4{background:linear-gradient(135deg,var(--danger),#f87171)}.s-a5{background:linear-gradient(135deg,var(--accent),#67e8f9)}
+.s-name{font-size:.83rem;font-weight:600;color:var(--text);flex:1}.s-course{font-size:.73rem;color:var(--muted)}
+.s-progress{display:flex;align-items:center;gap:.5rem;min-width:100px}
+.s-bar{flex:1;height:5px;background:var(--border);border-radius:999px;overflow:hidden}
+.s-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:999px}
+.s-pct{font-size:.73rem;font-weight:600;color:var(--primary);min-width:28px;text-align:right}
+.s-grade{padding:.2rem .6rem;border-radius:6px;font-size:.72rem;font-weight:700}
+.s-grade.a{background:#d1fae5;color:var(--success)}.s-grade.b{background:#dbeafe;color:#1d4ed8}.s-grade.c{background:#fef3c7;color:var(--warning)}
+.msg-item{display:flex;align-items:flex-start;gap:.85rem;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.msg-item:last-child{border-bottom:none}
+.msg-avatar{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--primary));display:flex;align-items:center;justify-content:center;color:#fff;font-size:.72rem;font-weight:700;flex-shrink:0}
+.msg-content{flex:1}.msg-name{font-size:.82rem;font-weight:700;color:var(--text)}.msg-text{font-size:.75rem;color:var(--muted);margin-top:.1rem}.msg-time{font-size:.68rem;color:var(--muted);margin-top:.2rem}
+.msg-unread{width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0;margin-top:.4rem}
+.legend{display:flex;gap:1rem;margin-bottom:.75rem}
+.leg{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--muted)}
+.leg-dot{width:10px;height:10px;border-radius:3px}
+.chart-bars{display:flex;align-items:flex-end;gap:.4rem;height:90px}
+.bar{flex:1;border-radius:6px 6px 0 0;transition:all .3s}
+.bar.p{background:linear-gradient(to top,var(--primary),#818cf8)}
+.bar.p.active{background:linear-gradient(to top,var(--accent),#67e8f9)}
+.bar-labels{display:flex;gap:.4rem;margin-top:.35rem}
+.bar-label{flex:1;text-align:center;font-size:.62rem;color:var(--muted)}
+
+/* ============ PAGE 2: MES COURS ============ */
+.courses-list{display:flex;flex-direction:column;gap:1rem}
+.course-detail-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:box-shadow .2s}
+.course-detail-card:hover{box-shadow:var(--shadow)}
+.cdc-header{display:flex;align-items:center;gap:1.25rem;padding:1.25rem 1.5rem;border-bottom:1px solid var(--border)}
+.cdc-thumb{width:60px;height:60px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;flex-shrink:0}
+.cdc-info{flex:1}
+.cdc-title{font-size:1rem;font-weight:700;color:var(--text)}
+.cdc-meta{display:flex;gap:1rem;margin-top:.4rem;flex-wrap:wrap}
+.cdc-meta-item{font-size:.75rem;color:var(--muted);display:flex;align-items:center;gap:.3rem}
+.cdc-actions{display:flex;gap:.5rem;align-items:center}
+.cdc-body{display:grid;grid-template-columns:repeat(5,1fr);padding:1rem 1.5rem;gap:1rem}
+.cdc-stat{text-align:center;padding:.6rem;border-radius:10px;background:var(--bg)}
+.cdc-stat-val{font-size:1.1rem;font-weight:800;color:var(--text)}
+.cdc-stat-lbl{font-size:.65rem;color:var(--muted)}
+.action-btn{padding:.25rem .7rem;border-radius:8px;font-size:.72rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:transparent;font-family:'Poppins',sans-serif;transition:all .2s;color:var(--muted)}
+.action-btn:hover{border-color:var(--primary);color:var(--primary)}
+.action-btn.edit{border-color:var(--primary);color:var(--primary);background:var(--primary-l)}
+.action-btn.del:hover{border-color:var(--danger);color:var(--danger)}
+
+/* ============ PAGE 3: ÉTUDIANTS ============ */
+.students-filters{display:flex;gap:.75rem;margin-bottom:1.5rem;flex-wrap:wrap;align-items:center}
+.search-filter{display:flex;align-items:center;gap:.5rem;background:var(--surface);border:1.5px solid var(--border);border-radius:var(--radius);padding:.45rem 1rem;flex:1;max-width:300px}
+.search-filter input{border:none;background:transparent;outline:none;font-family:'Poppins',sans-serif;font-size:.82rem;color:var(--text);width:100%}
+.filter-btn{padding:.4rem 1rem;border-radius:999px;font-size:.78rem;font-weight:600;cursor:pointer;border:1.5px solid var(--border);background:var(--surface);color:var(--muted);transition:all .2s;font-family:'Poppins',sans-serif}
+.filter-btn.active,.filter-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+.select-filter{padding:.4rem .85rem;border-radius:var(--radius);border:1.5px solid var(--border);background:var(--surface);font-family:'Poppins',sans-serif;font-size:.8rem;color:var(--text);cursor:pointer;outline:none}
+.students-table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden}
+.full-table{width:100%;border-collapse:collapse}
+.full-table thead th{text-align:left;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;padding:.75rem 1rem;border-bottom:2px solid var(--border);background:var(--bg)}
+.full-table tbody td{padding:.8rem 1rem;border-bottom:1px solid var(--border);font-size:.82rem;vertical-align:middle}
+.full-table tbody tr:last-child td{border-bottom:none}
+.full-table tbody tr:hover td{background:var(--bg)}
+.prog-bar{width:100px;height:6px;background:var(--border);border-radius:999px;overflow:hidden;display:inline-block}
+.prog-fill{height:100%;background:linear-gradient(90deg,var(--primary),var(--accent));border-radius:999px}
+.grade-pill{padding:.2rem .6rem;border-radius:6px;font-size:.72rem;font-weight:700}
+.g-a{background:#d1fae5;color:var(--success)}.g-b{background:#dbeafe;color:#1d4ed8}.g-c{background:#fef3c7;color:var(--warning)}.g-f{background:#fee2e2;color:var(--danger)}
+.pagination{display:flex;align-items:center;justify-content:space-between;padding:1rem 1.5rem;border-top:1px solid var(--border)}
+.pag-info{font-size:.78rem;color:var(--muted)}
+.pag-btns{display:flex;gap:.4rem}
+.pag-btn{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface);font-size:.78rem;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;font-family:'Poppins',sans-serif;transition:all .2s;color:var(--muted)}
+.pag-btn.active,.pag-btn:hover{background:var(--primary);color:#fff;border-color:var(--primary)}
+
+/* ============ PAGE 4: REVENUS ============ */
+.revenue-cards{display:grid;grid-template-columns:repeat(4,1fr);gap:1.25rem;margin-bottom:2rem}
+.rev-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;position:relative;overflow:hidden}
+.rev-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.rev-card:nth-child(1)::before{background:linear-gradient(90deg,var(--primary),var(--accent))}
+.rev-card:nth-child(2)::before{background:linear-gradient(90deg,var(--success),#34d399)}
+.rev-card:nth-child(3)::before{background:linear-gradient(90deg,var(--warning),#fcd34d)}
+.rev-card:nth-child(4)::before{background:linear-gradient(90deg,#a78bfa,var(--primary))}
+.rev-label{font-size:.78rem;color:var(--muted);margin-bottom:.4rem}
+.rev-value{font-size:1.6rem;font-weight:800;color:var(--text)}
+.rev-change{font-size:.72rem;font-weight:600;margin-top:.3rem}
+.rev-change.up{color:var(--success)}.rev-change.down{color:var(--danger)}
+.revenue-layout{display:grid;grid-template-columns:2fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.big-chart{height:160px;display:flex;align-items:flex-end;gap:.6rem}
+.bc-bar{flex:1;border-radius:6px 6px 0 0;background:linear-gradient(to top,var(--primary),#818cf8);transition:filter .2s;cursor:pointer}
+.bc-bar:hover{filter:brightness(1.1)}
+.bc-bar.hi{background:linear-gradient(to top,var(--accent),#67e8f9)}
+.bc-labels{display:flex;gap:.6rem;margin-top:.4rem}
+.bc-label{flex:1;text-align:center;font-size:.65rem;color:var(--muted)}
+.payment-row{display:flex;align-items:center;gap:.85rem;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.payment-row:last-child{border-bottom:none}
+.pay-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+.pi-g{background:#d1fae5}.pi-y{background:#fef3c7}.pi-r{background:#fee2e2}
+.pay-info{flex:1}.pay-course{font-size:.82rem;font-weight:600;color:var(--text)}.pay-student{font-size:.72rem;color:var(--muted)}
+.pay-amount{font-size:.9rem;font-weight:800;color:var(--success)}
+.pay-date{font-size:.7rem;color:var(--muted)}
+.pay-status-badge{padding:.18rem .55rem;border-radius:999px;font-size:.65rem;font-weight:700}
+.psb-ok{background:#d1fae5;color:var(--success)}.psb-pend{background:#fef3c7;color:var(--warning)}
+
+/* ============ PAGE 5: LIVES ============ */
+.live-upcoming{background:linear-gradient(135deg,#1e1b4b,#4f46e5);border-radius:20px;padding:2rem;margin-bottom:2rem;color:#fff;position:relative;overflow:hidden}
+.live-upcoming::after{content:'🔴 LIVE';position:absolute;top:1rem;right:1.5rem;background:rgba(239,68,68,.9);font-size:.7rem;font-weight:700;padding:.3rem .75rem;border-radius:999px;animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.live-title{font-size:1.3rem;font-weight:700;margin-bottom:.4rem}
+.live-meta{font-size:.82rem;opacity:.75;margin-bottom:1.25rem}
+.live-actions{display:flex;gap:.75rem}
+.lb{padding:.55rem 1.25rem;border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;border:none}
+.lb-white{background:#fff;color:var(--primary)}
+.lb-ghost{background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3)}
+.lb-ghost:hover{background:rgba(255,255,255,.25)}
+.lives-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:1.25rem;margin-bottom:1.5rem}
+.live-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.25rem;transition:transform .2s,box-shadow .2s}
+.live-card:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.live-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:.85rem}
+.live-course-badge{font-size:.72rem;font-weight:700;color:var(--primary);background:var(--primary-l);padding:.2rem .6rem;border-radius:999px}
+.live-status{font-size:.68rem;font-weight:700;padding:.2rem .6rem;border-radius:999px}
+.ls-upcoming{background:#fef3c7;color:var(--warning)}
+.ls-ended{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+.live-card-title{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.35rem}
+.live-card-desc{font-size:.75rem;color:var(--muted);margin-bottom:.85rem}
+.live-card-footer{display:flex;align-items:center;justify-content:space-between;font-size:.75rem;color:var(--muted)}
+.live-attendees{font-weight:700;color:var(--text)}
+
+/* ============ PAGE 6: MESSAGES ============ */
+.messages-layout{display:grid;grid-template-columns:320px 1fr;gap:0;background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;min-height:600px}
+.msg-list{border-right:1px solid var(--border);display:flex;flex-direction:column}
+.msg-list-header{padding:1.1rem 1.25rem;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.msg-list-title{font-size:.95rem;font-weight:700;color:var(--text)}
+.msg-search{display:flex;align-items:center;gap:.4rem;margin:.85rem 1.25rem;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--radius);padding:.4rem .75rem}
+.msg-search input{border:none;background:transparent;outline:none;font-family:'Poppins',sans-serif;font-size:.78rem;color:var(--text);flex:1}
+.msg-thread{display:flex;align-items:flex-start;gap:.75rem;padding:.85rem 1.25rem;cursor:pointer;border-bottom:1px solid var(--border);transition:background .15s}
+.msg-thread:hover{background:var(--bg)}
+.msg-thread.active{background:var(--primary-l)}
+.mt-avatar{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.8rem;font-weight:700;color:#fff;flex-shrink:0}
+.mt-info{flex:1;min-width:0}
+.mt-name{font-size:.83rem;font-weight:700;color:var(--text)}
+.mt-preview{font-size:.73rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.1rem}
+.mt-right{display:flex;flex-direction:column;align-items:flex-end;gap:.3rem;flex-shrink:0}
+.mt-time{font-size:.65rem;color:var(--muted)}
+.mt-unread{width:18px;height:18px;border-radius:50%;background:var(--primary);color:#fff;font-size:.6rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+.msg-conversation{display:flex;flex-direction:column}
+.conv-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.75rem}
+.conv-name{font-size:.95rem;font-weight:700;color:var(--text)}
+.conv-course{font-size:.75rem;color:var(--muted)}
+.conv-messages{flex:1;padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto}
+.msg-bubble{display:flex;gap:.75rem;align-items:flex-start}
+.msg-bubble.mine{flex-direction:row-reverse}
+.bubble-av{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.7rem;font-weight:700;color:#fff;flex-shrink:0}
+.bubble-content{max-width:68%}
+.bubble-text{padding:.75rem 1rem;border-radius:14px;font-size:.82rem;line-height:1.55}
+.msg-bubble:not(.mine) .bubble-text{background:var(--bg);border:1.5px solid var(--border);color:var(--text);border-radius:4px 14px 14px 14px}
+.msg-bubble.mine .bubble-text{background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border-radius:14px 4px 14px 14px}
+.bubble-time{font-size:.65rem;color:var(--muted);margin-top:.3rem;text-align:right}
+.msg-bubble:not(.mine) .bubble-time{text-align:left}
+.conv-input{padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:.75rem;align-items:center}
+.conv-input input{flex:1;border:1.5px solid var(--border);border-radius:var(--radius);padding:.6rem 1rem;font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
+.conv-input input:focus{border-color:var(--primary)}
+.send-btn{padding:.6rem 1.25rem;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff;border:none;border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.82rem;font-weight:600;cursor:pointer}
+
+/* ============ PAGE 7: PROFIL ============ */
+.profile-layout{display:grid;grid-template-columns:320px 1fr;gap:1.5rem}
+.profile-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:2rem;text-align:center}
+.profile-avatar{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,var(--accent),var(--primary));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:1.75rem;margin:0 auto 1rem;border:3px solid var(--primary-l)}
+.profile-name{font-size:1.2rem;font-weight:800;color:var(--text)}
+.profile-title{font-size:.82rem;color:var(--muted);margin:.3rem 0 .75rem}
+.profile-verified{display:inline-flex;align-items:center;gap:.3rem;background:#d1fae5;color:var(--success);font-size:.72rem;font-weight:700;padding:.25rem .75rem;border-radius:999px}
+.profile-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin:1.5rem 0}
+.prof-stat{background:var(--bg);border-radius:10px;padding:.75rem;text-align:center}
+.ps-val{font-size:1.1rem;font-weight:800;color:var(--text)}
+.ps-lbl{font-size:.65rem;color:var(--muted)}
+.profile-bio{font-size:.82rem;color:var(--muted);text-align:left;line-height:1.6;padding:1rem;background:var(--bg);border-radius:10px;margin-bottom:1rem}
+.profile-skills{display:flex;flex-wrap:wrap;gap:.4rem}
+.skill-tag{background:var(--primary-l);color:var(--primary);font-size:.72rem;font-weight:600;padding:.25rem .65rem;border-radius:999px}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:.4rem;margin-bottom:1rem}
+.form-label{font-size:.8rem;font-weight:600;color:var(--text)}
+.form-input{padding:.55rem .9rem;border:1.5px solid var(--border);border-radius:var(--radius);font-family:'Poppins',sans-serif;font-size:.85rem;color:var(--text);background:var(--bg);outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--primary)}
+
+/* ============ RESPONSIVE ============ */
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:.4rem;border-radius:8px;font-size:1.4rem;color:var(--text);transition:background .2s}
+.hamburger:hover{background:var(--primary-l)}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:49}
+.sidebar-overlay.open{display:block}
+
+@media(max-width:1024px){
+  .stats-grid{grid-template-columns:repeat(2,1fr)}
+  .revenue-cards{grid-template-columns:repeat(2,1fr)}
+  .two-col{grid-template-columns:1fr}
+  .revenue-layout{grid-template-columns:1fr}
+  .profile-layout{grid-template-columns:1fr}
+  .cdc-body{grid-template-columns:repeat(3,1fr)}
+}
+
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .3s ease;box-shadow:none}
+  .sidebar.open{transform:translateX(0);box-shadow:4px 0 24px rgba(0,0,0,.15)}
+  .main{margin-left:0}
+  .hamburger{display:flex;align-items:center;justify-content:center}
+  .topbar{padding:.85rem 1rem}
+  .topbar-title{font-size:.95rem}
+  .btn-create span{display:none}
+  .btn-create{padding:.5rem .75rem}
+  .content{padding:1rem}
+  .stats-grid{grid-template-columns:repeat(2,1fr);gap:.75rem}
+  .revenue-cards{grid-template-columns:repeat(2,1fr);gap:.75rem}
+  .two-col{grid-template-columns:1fr;gap:1rem}
+  .revenue-layout{grid-template-columns:1fr}
+  .welcome-banner{padding:1.25rem 1.5rem;flex-direction:column;align-items:flex-start;gap:1rem}
+  .welcome-actions{flex-wrap:wrap}
+  .welcome-text h2{font-size:1.1rem}
+  .profile-layout{grid-template-columns:1fr}
+  .messages-layout{grid-template-columns:1fr;min-height:auto}
+  .msg-list{border-right:none;border-bottom:1px solid var(--border)}
+  .msg-conversation{min-height:400px}
+  .lives-grid{grid-template-columns:1fr}
+  .cdc-body{grid-template-columns:repeat(2,1fr)}
+  .cdc-header{flex-wrap:wrap;gap:.75rem}
+  .cdc-actions{flex-wrap:wrap}
+  .students-filters{flex-wrap:wrap;gap:.5rem}
+  .search-filter{max-width:100%;flex:1 1 100%}
+  .students-table-wrap{overflow-x:auto}
+  .full-table{min-width:700px}
+  .form-row{grid-template-columns:1fr}
+  .page-header{flex-direction:column;align-items:flex-start;gap:.75rem}
+  .page-title{font-size:1.15rem}
+}
+
+@media(max-width:480px){
+  .stats-grid{grid-template-columns:1fr}
+  .revenue-cards{grid-template-columns:1fr}
+  .course-row{grid-template-columns:1fr auto;row-gap:.5rem}
+  .students-count{display:none}
+  .topbar-right .btn-create{font-size:.75rem}
+  .welcome-banner{padding:1rem 1.25rem}
+  .cdc-body{grid-template-columns:repeat(2,1fr)}
+}
+
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">ICONNECT</div>
+    <div class="logo-sub">Espace Formateur</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="avatar">MD</div>
+    <div>
+      <div class="user-name">Marie Dubois</div>
+      <div class="badge-role">Formateur</div>
+    </div>
+  </div>
+  <nav>
+    <div class="nav-section">Vue d'ensemble</div>
+    <div class="nav-item active" onclick="showPage('dashboard',this)"><span class="icon">🏠</span> Tableau de bord</div>
+
+    <div class="nav-section">Pédagogie</div>
+    <div class="nav-item" onclick="showPage('cours',this)"><span class="icon">📚</span> Mes cours</div>
+    <div class="nav-item" onclick="showPage('etudiants',this)"><span class="icon">👥</span> Mes étudiants</div>
+    <div class="nav-item" onclick="showPage('lives',this)"><span class="icon">📡</span> Sessions Live</div>
+
+    <div class="nav-section">Business</div>
+    <div class="nav-item" onclick="showPage('revenus',this)"><span class="icon">💰</span> Revenus</div>
+
+    <div class="nav-section">Communication</div>
+    <div class="nav-item" onclick="showPage('messages',this)"><span class="icon">💬</span> Messages <span class="nav-badge">4</span></div>
+
+    <div class="nav-section">Compte</div>
+    <div class="nav-item" onclick="showPage('profil',this)"><span class="icon">👤</span> Mon profil</div>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="logout-btn"><span>🚪</span> Déconnexion</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <button class="hamburger" id="hamburgerBtn" aria-label="Menu">☰</button>
+    <div class="topbar-title" id="topbarTitle">Tableau de bord <span>Formateur</span></div>
+    <div class="topbar-right">
+      <button class="btn-create" onclick="showPage('cours',null)">➕ Nouveau cours</button>
+      <div class="icon-btn">🔔<div class="notif-dot"></div></div>
+      <div class="icon-btn" onclick="showPage('profil',null)">👤</div>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- ========== PAGE: DASHBOARD ========== -->
+    <div class="page active" id="page-dashboard">
+      <div class="welcome-banner">
+        <div class="welcome-text">
+          <h2>Bonjour Marie 👋</h2>
+          <p>Vous avez 4 nouveaux messages et 12 nouvelles inscriptions cette semaine.</p>
+        </div>
+        <div class="welcome-actions">
+          <button class="wbtn" onclick="showPage('lives',null)">📡 Planifier un Live</button>
+          <button class="wbtn solid" onclick="showPage('cours',null)">➕ Créer un cours</button>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-icon purple">📚</div><div class="stat-value">8</div><div class="stat-label">Cours publiés</div><div class="stat-change up">↑ 1 ce mois</div></div>
+        <div class="stat-card"><div class="stat-icon green">👥</div><div class="stat-value">312</div><div class="stat-label">Étudiants actifs</div><div class="stat-change up">↑ 28 cette semaine</div></div>
+        <div class="stat-card"><div class="stat-icon yellow">⭐</div><div class="stat-value">4.9/5</div><div class="stat-label">Note moyenne</div><div class="stat-change up">↑ 0.1 ce mois</div></div>
+        <div class="stat-card"><div class="stat-icon red">💰</div><div class="stat-value">18 240€</div><div class="stat-label">Revenus totaux</div><div class="stat-change up">↑ 2 100€ ce mois</div></div>
+      </div>
+      <div class="two-col">
+        <!-- Cours -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">📚 Mes cours</div><button class="card-action" onclick="showPage('cours',null)">Gérer →</button></div>
+          <div class="course-row"><div class="course-info-col"><div class="course-thumb t1">🎨</div><div><div class="cn">UI/UX Design Avancé</div><div class="cm">24 modules · Publié</div></div></div><div class="students-count"><div class="sc-val">312</div><div class="sc-lbl">étudiants</div></div><span class="status-badge sb-pub">Publié</span><button class="action-dots">⋮</button></div>
+          <div class="course-row"><div class="course-info-col"><div class="course-thumb t2">💻</div><div><div class="cn">HTML & CSS Pro</div><div class="cm">18 modules · Publié</div></div></div><div class="students-count"><div class="sc-val">198</div><div class="sc-lbl">étudiants</div></div><span class="status-badge sb-pub">Publié</span><button class="action-dots">⋮</button></div>
+          <div class="course-row"><div class="course-info-col"><div class="course-thumb t3">🎬</div><div><div class="cn">Design Mobile – React Native</div><div class="cm">18 modules · En construction</div></div></div><div class="students-count"><div class="sc-val">0</div><div class="sc-lbl">étudiants</div></div><span class="status-badge sb-draft">Brouillon</span><button class="action-dots">⋮</button></div>
+          <div class="course-row"><div class="course-info-col"><div class="course-thumb t4">🔴</div><div><div class="cn">Figma Masterclass 2025</div><div class="cm">30 modules · Soumis</div></div></div><div class="students-count"><div class="sc-val">37</div><div class="sc-lbl">étudiants</div></div><span class="status-badge sb-review">En révision</span><button class="action-dots">⋮</button></div>
+        </div>
+        <!-- Messages -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">💬 Messages récents</div><button class="card-action" onclick="showPage('messages',null)">Tous →</button></div>
+          <div class="msg-item"><div class="msg-avatar">KM</div><div class="msg-content"><div class="msg-name">Koffi Mensah</div><div class="msg-text">Bonjour, j'ai une question sur le module 18…</div><div class="msg-time">Il y a 5 min</div></div><div class="msg-unread"></div></div>
+          <div class="msg-item"><div class="msg-avatar">AB</div><div class="msg-content"><div class="msg-name">Amara Bah</div><div class="msg-text">Merci pour les corrections ! Super cours 🙏</div><div class="msg-time">Il y a 1h</div></div></div>
+          <div class="msg-item"><div class="msg-avatar">SL</div><div class="msg-content"><div class="msg-name">Sara Lima</div><div class="msg-text">Est-ce que le prochain live est confirmé ?</div><div class="msg-time">Il y a 2h</div></div><div class="msg-unread"></div></div>
+          <div class="msg-item"><div class="msg-avatar">YD</div><div class="msg-content"><div class="msg-name">Yann Diallo</div><div class="msg-text">J'ai soumis mon devoir, pouvez-vous vérifier ?</div><div class="msg-time">Il y a 3h</div></div><div class="msg-unread"></div></div>
+        </div>
+      </div>
+      <div class="two-col">
+        <!-- Progression étudiants -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">👥 Progression des étudiants</div><button class="card-action" onclick="showPage('etudiants',null)">Voir tout →</button></div>
+          <div class="student-row"><div class="s-avatar s-a1">KM</div><div style="flex:1"><div class="s-name">Koffi Mensah</div><div class="s-course">UI/UX Avancé</div></div><div class="s-progress"><div class="s-bar"><div class="s-fill" style="width:78%"></div></div><div class="s-pct">78%</div></div><div class="s-grade a">A</div></div>
+          <div class="student-row"><div class="s-avatar s-a2">AB</div><div style="flex:1"><div class="s-name">Amara Bah</div><div class="s-course">HTML & CSS</div></div><div class="s-progress"><div class="s-bar"><div class="s-fill" style="width:92%"></div></div><div class="s-pct">92%</div></div><div class="s-grade a">A+</div></div>
+          <div class="student-row"><div class="s-avatar s-a3">SL</div><div style="flex:1"><div class="s-name">Sara Lima</div><div class="s-course">UI/UX Avancé</div></div><div class="s-progress"><div class="s-bar"><div class="s-fill" style="width:61%"></div></div><div class="s-pct">61%</div></div><div class="s-grade b">B</div></div>
+          <div class="student-row"><div class="s-avatar s-a4">YD</div><div style="flex:1"><div class="s-name">Yann Diallo</div><div class="s-course">Figma Masterclass</div></div><div class="s-progress"><div class="s-bar"><div class="s-fill" style="width:45%"></div></div><div class="s-pct">45%</div></div><div class="s-grade c">C</div></div>
+          <div class="student-row"><div class="s-avatar s-a5">EN</div><div style="flex:1"><div class="s-name">Eva Nkosi</div><div class="s-course">HTML & CSS</div></div><div class="s-progress"><div class="s-bar"><div class="s-fill" style="width:85%"></div></div><div class="s-pct">85%</div></div><div class="s-grade a">A</div></div>
+        </div>
+        <!-- Revenus -->
+        <div class="card">
+          <div class="card-header"><div class="card-title">💰 Revenus mensuels</div><button class="card-action" onclick="showPage('revenus',null)">Détails →</button></div>
+          <div class="legend"><div class="leg"><div class="leg-dot" style="background:var(--primary)"></div>Revenus (€)</div><div class="leg"><div class="leg-dot" style="background:var(--success)"></div>Inscrits</div></div>
+          <div class="chart-bars">
+            <div class="bar p" style="height:45%"></div>
+            <div class="bar p" style="height:60%"></div>
+            <div class="bar p" style="height:50%"></div>
+            <div class="bar p" style="height:75%"></div>
+            <div class="bar p active" style="height:90%"></div>
+            <div class="bar p" style="height:70%"></div>
+          </div>
+          <div class="bar-labels"><span class="bar-label">Jan</span><span class="bar-label">Fév</span><span class="bar-label">Mar</span><span class="bar-label">Avr</span><span class="bar-label">Mai</span><span class="bar-label">Jun</span></div>
+          <div style="margin-top:1rem;padding:1rem;background:var(--bg);border-radius:12px;display:flex;justify-content:space-between;align-items:center">
+            <div><div style="font-size:.72rem;color:var(--muted)">Revenus avril</div><div style="font-size:1.25rem;font-weight:800;color:var(--text)">2 100€</div></div>
+            <div style="text-align:right"><div style="font-size:.72rem;color:var(--muted)">Part formateur (70%)</div><div style="font-size:1.25rem;font-weight:800;color:var(--success)">1 470€</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: MES COURS ========== -->
+    <div class="page" id="page-cours">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Mes <span>Cours</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">8 cours · 547 étudiants au total</div>
+        </div>
+        <button class="btn btn-primary">➕ Créer un nouveau cours</button>
+      </div>
+      <div class="students-filters" style="margin-bottom:1.5rem">
+        <button class="filter-btn active">Tous (8)</button>
+        <button class="filter-btn">Publiés (5)</button>
+        <button class="filter-btn">En révision (1)</button>
+        <button class="filter-btn">Brouillons (2)</button>
+        <select class="select-filter" style="margin-left:auto"><option>Trier par inscrits</option><option>Trier par revenus</option><option>Trier par note</option></select>
+      </div>
+      <div class="courses-list">
+        <div class="course-detail-card"><div class="cdc-header"><div class="cdc-thumb t1">🎨</div><div class="cdc-info"><div class="cdc-title">UI/UX Design Avancé</div><div class="cdc-meta"><span class="cdc-meta-item">📚 24 modules</span><span class="cdc-meta-item">⏱ 18h de contenu</span><span class="cdc-meta-item">🎯 Avancé</span><span class="cdc-meta-item">💰 89€</span></span></div></div><div class="cdc-actions"><span class="status-badge sb-pub">Publié</span><button class="action-btn edit">✏️ Éditer</button><button class="action-btn">📊 Stats</button><button class="action-btn del">🗑</button></div></div><div class="cdc-body"><div class="cdc-stat"><div class="cdc-stat-val">312</div><div class="cdc-stat-lbl">Inscrits</div></div><div class="cdc-stat"><div class="cdc-stat-val">78%</div><div class="cdc-stat-lbl">Complétion</div></div><div class="cdc-stat"><div class="cdc-stat-val">4.9 ⭐</div><div class="cdc-stat-lbl">Note</div></div><div class="cdc-stat"><div class="cdc-stat-val">247</div><div class="cdc-stat-lbl">Avis</div></div><div class="cdc-stat"><div class="cdc-stat-val" style="color:var(--success)">19 425€</div><div class="cdc-stat-lbl">Revenus</div></div></div></div>
+
+        <div class="course-detail-card"><div class="cdc-header"><div class="cdc-thumb t2">💻</div><div class="cdc-info"><div class="cdc-title">HTML & CSS Professionnel</div><div class="cdc-meta"><span class="cdc-meta-item">📚 18 modules</span><span class="cdc-meta-item">⏱ 12h de contenu</span><span class="cdc-meta-item">🎯 Débutant</span><span class="cdc-meta-item">💰 49€</span></span></div></div><div class="cdc-actions"><span class="status-badge sb-pub">Publié</span><button class="action-btn edit">✏️ Éditer</button><button class="action-btn">📊 Stats</button><button class="action-btn del">🗑</button></div></div><div class="cdc-body"><div class="cdc-stat"><div class="cdc-stat-val">198</div><div class="cdc-stat-lbl">Inscrits</div></div><div class="cdc-stat"><div class="cdc-stat-val">85%</div><div class="cdc-stat-lbl">Complétion</div></div><div class="cdc-stat"><div class="cdc-stat-val">4.8 ⭐</div><div class="cdc-stat-lbl">Note</div></div><div class="cdc-stat"><div class="cdc-stat-val">163</div><div class="cdc-stat-lbl">Avis</div></div><div class="cdc-stat"><div class="cdc-stat-val" style="color:var(--success)">6 804€</div><div class="cdc-stat-lbl">Revenus</div></div></div></div>
+
+        <div class="course-detail-card"><div class="cdc-header"><div class="cdc-thumb t4">🔴</div><div class="cdc-info"><div class="cdc-title">Figma Masterclass 2025</div><div class="cdc-meta"><span class="cdc-meta-item">📚 30 modules</span><span class="cdc-meta-item">⏱ 22h de contenu</span><span class="cdc-meta-item">🎯 Intermédiaire</span><span class="cdc-meta-item">💰 79€</span></span></div></div><div class="cdc-actions"><span class="status-badge sb-review">En révision</span><button class="action-btn edit">✏️ Éditer</button><button class="action-btn">📊 Stats</button><button class="action-btn del">🗑</button></div></div><div class="cdc-body"><div class="cdc-stat"><div class="cdc-stat-val">37</div><div class="cdc-stat-lbl">Inscrits</div></div><div class="cdc-stat"><div class="cdc-stat-val">42%</div><div class="cdc-stat-lbl">Complétion</div></div><div class="cdc-stat"><div class="cdc-stat-val">4.7 ⭐</div><div class="cdc-stat-lbl">Note</div></div><div class="cdc-stat"><div class="cdc-stat-val">22</div><div class="cdc-stat-lbl">Avis</div></div><div class="cdc-stat"><div class="cdc-stat-val" style="color:var(--success)">2 052€</div><div class="cdc-stat-lbl">Revenus</div></div></div></div>
+
+        <div class="course-detail-card"><div class="cdc-header"><div class="cdc-thumb t3">🎬</div><div class="cdc-info"><div class="cdc-title">Design Mobile – React Native</div><div class="cdc-meta"><span class="cdc-meta-item">📚 18 modules</span><span class="cdc-meta-item">⏱ — (en cours)</span><span class="cdc-meta-item">🎯 Avancé</span><span class="cdc-meta-item">💰 99€</span></span></div></div><div class="cdc-actions"><span class="status-badge sb-draft">Brouillon</span><button class="action-btn edit">✏️ Éditer</button><button class="action-btn">👁 Aperçu</button><button class="action-btn del">🗑</button></div></div><div class="cdc-body"><div class="cdc-stat"><div class="cdc-stat-val">0</div><div class="cdc-stat-lbl">Inscrits</div></div><div class="cdc-stat"><div class="cdc-stat-val">—</div><div class="cdc-stat-lbl">Complétion</div></div><div class="cdc-stat"><div class="cdc-stat-val">—</div><div class="cdc-stat-lbl">Note</div></div><div class="cdc-stat"><div class="cdc-stat-val">—</div><div class="cdc-stat-lbl">Avis</div></div><div class="cdc-stat"><div class="cdc-stat-val" style="color:var(--muted)">—</div><div class="cdc-stat-lbl">Revenus</div></div></div></div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: ÉTUDIANTS ========== -->
+    <div class="page" id="page-etudiants">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Mes <span>Étudiants</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">547 étudiants inscrits à vos cours</div>
+        </div>
+        <button class="btn btn-outline">📤 Exporter</button>
+      </div>
+      <div class="students-filters">
+        <div class="search-filter"><span>🔍</span><input placeholder="Rechercher un étudiant…"/></div>
+        <button class="filter-btn active">Tous (547)</button>
+        <button class="filter-btn">Actifs (412)</button>
+        <button class="filter-btn">Complétés (89)</button>
+        <button class="filter-btn">Inactifs (46)</button>
+        <select class="select-filter"><option>Tous les cours</option><option>UI/UX Avancé</option><option>HTML & CSS</option><option>Figma Masterclass</option></select>
+        <select class="select-filter"><option>Trier par progression</option><option>Trier par nom</option><option>Trier par date</option></select>
+      </div>
+      <div class="students-table-wrap">
+        <table class="full-table">
+          <thead><tr><th>Étudiant</th><th>Cours suivi</th><th>Inscription</th><th>Progression</th><th>Dernière activité</th><th>Note</th><th>Certificat</th><th>Action</th></tr></thead>
+          <tbody>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar s-a2">AB</div><div><div style="font-weight:600;font-size:.83rem">Amara Bah</div><div style="font-size:.72rem;color:var(--muted)">amara@email.com</div></div></div></td><td style="font-size:.8rem">HTML & CSS Pro</td><td style="font-size:.78rem;color:var(--muted)">5 Jan 2026</td><td><div style="display:flex;align-items:center;gap:.5rem"><div class="prog-bar"><div class="prog-fill" style="width:92%"></div></div><span style="font-size:.72rem;font-weight:700;color:var(--primary)">92%</span></div></td><td style="font-size:.78rem;color:var(--muted)">Aujourd'hui</td><td><span class="grade-pill g-a">A+</span></td><td><span style="font-size:.72rem;color:var(--success);font-weight:600">✅ Émis</span></td><td><button class="action-btn">Message</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar s-a5">EN</div><div><div style="font-weight:600;font-size:.83rem">Eva Nkosi</div><div style="font-size:.72rem;color:var(--muted)">eva@email.com</div></div></div></td><td style="font-size:.8rem">HTML & CSS Pro</td><td style="font-size:.78rem;color:var(--muted)">12 Jan 2026</td><td><div style="display:flex;align-items:center;gap:.5rem"><div class="prog-bar"><div class="prog-fill" style="width:85%"></div></div><span style="font-size:.72rem;font-weight:700;color:var(--primary)">85%</span></div></td><td style="font-size:.78rem;color:var(--muted)">Hier</td><td><span class="grade-pill g-a">A</span></td><td><span style="font-size:.72rem;color:var(--muted)">—</span></td><td><button class="action-btn">Message</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar s-a1">KM</div><div><div style="font-weight:600;font-size:.83rem">Koffi Mensah</div><div style="font-size:.72rem;color:var(--muted)">koffi@email.com</div></div></div></td><td style="font-size:.8rem">UI/UX Avancé</td><td style="font-size:.78rem;color:var(--muted)">20 Jan 2026</td><td><div style="display:flex;align-items:center;gap:.5rem"><div class="prog-bar"><div class="prog-fill" style="width:78%"></div></div><span style="font-size:.72rem;font-weight:700;color:var(--primary)">78%</span></div></td><td style="font-size:.78rem;color:var(--muted)">Il y a 2j</td><td><span class="grade-pill g-a">A</span></td><td><span style="font-size:.72rem;color:var(--muted)">—</span></td><td><button class="action-btn">Message</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar s-a3">SL</div><div><div style="font-weight:600;font-size:.83rem">Sara Lima</div><div style="font-size:.72rem;color:var(--muted)">sara@email.com</div></div></div></td><td style="font-size:.8rem">UI/UX Avancé</td><td style="font-size:.78rem;color:var(--muted)">3 Fév 2026</td><td><div style="display:flex;align-items:center;gap:.5rem"><div class="prog-bar"><div class="prog-fill" style="width:61%"></div></div><span style="font-size:.72rem;font-weight:700;color:var(--primary)">61%</span></div></td><td style="font-size:.78rem;color:var(--muted)">Il y a 4j</td><td><span class="grade-pill g-b">B</span></td><td><span style="font-size:.72rem;color:var(--muted)">—</span></td><td><button class="action-btn">Message</button></td></tr>
+            <tr><td><div style="display:flex;align-items:center;gap:.65rem"><div class="t-avatar s-a4">YD</div><div><div style="font-weight:600;font-size:.83rem">Yann Diallo</div><div style="font-size:.72rem;color:var(--muted)">yann@email.com</div></div></div></td><td style="font-size:.8rem">Figma Masterclass</td><td style="font-size:.78rem;color:var(--muted)">15 Fév 2026</td><td><div style="display:flex;align-items:center;gap:.5rem"><div class="prog-bar"><div class="prog-fill" style="width:45%"></div></div><span style="font-size:.72rem;font-weight:700;color:var(--warning)">45%</span></div></td><td style="font-size:.78rem;color:var(--muted)">Il y a 1sem</td><td><span class="grade-pill g-c">C</span></td><td><span style="font-size:.72rem;color:var(--muted)">—</span></td><td><button class="action-btn">Message</button></td></tr>
+          </tbody>
+        </table>
+        <div class="pagination">
+          <div class="pag-info">Affichage 1-5 sur 547 étudiants</div>
+          <div class="pag-btns"><button class="pag-btn">←</button><button class="pag-btn active">1</button><button class="pag-btn">2</button><button class="pag-btn">3</button><button class="pag-btn">→</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: REVENUS ========== -->
+    <div class="page" id="page-revenus">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Mes <span>Revenus</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">Part formateur : 70% · Virement mensuel le 1er du mois</div>
+        </div>
+        <button class="btn btn-outline">📥 Télécharger relevé</button>
+      </div>
+      <div class="revenue-cards">
+        <div class="rev-card"><div class="rev-label">Revenus totaux (brut)</div><div class="rev-value">26 057€</div><div class="rev-change up">↑ 12.4% vs 2025</div></div>
+        <div class="rev-card"><div class="rev-label">Part formateur (70%)</div><div class="rev-value">18 240€</div><div class="rev-change up">↑ En progression</div></div>
+        <div class="rev-card"><div class="rev-label">Ce mois (avril)</div><div class="rev-value">1 470€</div><div class="rev-change up">↑ 8.1% vs mars</div></div>
+        <div class="rev-card"><div class="rev-label">Virement prochain</div><div class="rev-value">1 470€</div><div class="rev-change" style="color:var(--muted)">📅 1er mai 2026</div></div>
+      </div>
+      <div class="revenue-layout">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📈 Revenus par mois (2026)</div><select style="font-size:.75rem;border:1.5px solid var(--border);border-radius:8px;padding:.2rem .5rem;font-family:'Poppins',sans-serif;color:var(--muted);background:var(--surface);cursor:pointer"><option>2026</option><option>2025</option></select></div>
+          <div class="big-chart">
+            <div class="bc-bar" style="height:30%"></div>
+            <div class="bc-bar" style="height:45%"></div>
+            <div class="bc-bar" style="height:38%"></div>
+            <div class="bc-bar hi" style="height:65%"></div>
+            <div class="bc-bar" style="height:55%"></div>
+            <div class="bc-bar" style="height:48%"></div>
+            <div class="bc-bar" style="height:72%"></div>
+            <div class="bc-bar" style="height:60%"></div>
+            <div class="bc-bar" style="height:80%"></div>
+            <div class="bc-bar" style="height:68%"></div>
+            <div class="bc-bar" style="height:90%"></div>
+            <div class="bc-bar" style="height:75%"></div>
+          </div>
+          <div class="bc-labels"><span class="bc-label">Jan</span><span class="bc-label">Fév</span><span class="bc-label">Mar</span><span class="bc-label">Avr</span><span class="bc-label">Mai</span><span class="bc-label">Jun</span><span class="bc-label">Jul</span><span class="bc-label">Aoû</span><span class="bc-label">Sep</span><span class="bc-label">Oct</span><span class="bc-label">Nov</span><span class="bc-label">Déc</span></div>
+          <!-- Breakdown by course -->
+          <div style="margin-top:1.25rem;border-top:1px solid var(--border);padding-top:1rem">
+            <div style="font-size:.82rem;font-weight:700;color:var(--text);margin-bottom:.85rem">Répartition par cours</div>
+            <div style="display:flex;flex-direction:column;gap:.6rem">
+              <div style="display:flex;align-items:center;gap:.75rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--primary);flex-shrink:0"></div><div style="flex:1;font-size:.8rem">UI/UX Avancé</div><div style="width:120px;height:6px;background:var(--border);border-radius:999px;overflow:hidden"><div style="width:74%;height:100%;background:var(--primary);border-radius:999px"></div></div><div style="font-size:.8rem;font-weight:700;min-width:65px;text-align:right;color:var(--success)">19 425€</div></div>
+              <div style="display:flex;align-items:center;gap:.75rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--accent);flex-shrink:0"></div><div style="flex:1;font-size:.8rem">HTML & CSS Pro</div><div style="width:120px;height:6px;background:var(--border);border-radius:999px;overflow:hidden"><div style="width:26%;height:100%;background:var(--accent);border-radius:999px"></div></div><div style="font-size:.8rem;font-weight:700;min-width:65px;text-align:right;color:var(--success)">6 804€</div></div>
+              <div style="display:flex;align-items:center;gap:.75rem"><div style="width:8px;height:8px;border-radius:50%;background:var(--warning);flex-shrink:0"></div><div style="flex:1;font-size:.8rem">Figma Masterclass</div><div style="width:120px;height:6px;background:var(--border);border-radius:999px;overflow:hidden"><div style="width:8%;height:100%;background:var(--warning);border-radius:999px"></div></div><div style="font-size:.8rem;font-weight:700;min-width:65px;text-align:right;color:var(--success)">2 052€</div></div>
+            </div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">💳 Derniers paiements</div></div>
+          <div class="payment-row"><div class="pay-icon pi-g">💳</div><div class="pay-info"><div class="pay-course">UI/UX Avancé</div><div class="pay-student">Koffi Mensah</div></div><div style="text-align:right"><div class="pay-amount">+62.30€</div><div class="pay-date">12 Avr</div></div></div>
+          <div class="payment-row"><div class="pay-icon pi-g">💳</div><div class="pay-info"><div class="pay-course">HTML & CSS Pro</div><div class="pay-student">Eva Nkosi</div></div><div style="text-align:right"><div class="pay-amount">+34.30€</div><div class="pay-date">11 Avr</div></div></div>
+          <div class="payment-row"><div class="pay-icon pi-y">⏳</div><div class="pay-info"><div class="pay-course">Figma Masterclass</div><div class="pay-student">Sara Lima</div></div><div style="text-align:right"><div class="pay-amount" style="color:var(--warning)">+55.30€</div><div class="pay-date">10 Avr</div></div></div>
+          <div class="payment-row"><div class="pay-icon pi-g">💳</div><div class="pay-info"><div class="pay-course">UI/UX Avancé</div><div class="pay-student">Yann Diallo</div></div><div style="text-align:right"><div class="pay-amount">+62.30€</div><div class="pay-date">9 Avr</div></div></div>
+          <div class="payment-row"><div class="pay-icon pi-g">💳</div><div class="pay-info"><div class="pay-course">HTML & CSS Pro</div><div class="pay-student">Amara Bah</div></div><div style="text-align:right"><div class="pay-amount">+34.30€</div><div class="pay-date">8 Avr</div></div></div>
+          <div style="margin-top:1rem;padding:.85rem;background:var(--bg);border-radius:12px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:.78rem;color:var(--muted)">IBAN enregistré</div>
+            <div style="font-family:monospace;font-size:.78rem;font-weight:700;color:var(--text)">FR76 ···· ···· 4821</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: SESSIONS LIVE ========== -->
+    <div class="page" id="page-lives">
+      <div class="page-header">
+        <div>
+          <div class="page-title">Sessions <span>Live</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">1 session en cours · 3 sessions planifiées</div>
+        </div>
+        <button class="btn btn-primary">📡 Planifier un live</button>
+      </div>
+      <!-- Active live -->
+      <div class="live-upcoming">
+        <div>
+          <div style="font-size:.75rem;opacity:.75;font-weight:600;letter-spacing:.08em;text-transform:uppercase;margin-bottom:.4rem">Session en cours</div>
+          <div class="live-title">Q&A – Maîtriser les composants Figma</div>
+          <div class="live-meta">📚 Figma Masterclass 2025 · Démarré il y a 18 min · 24 participants</div>
+          <div class="live-actions">
+            <button class="lb lb-white">🔗 Rejoindre la session</button>
+            <button class="lb lb-ghost">👥 Voir participants</button>
+            <button class="lb lb-ghost" style="background:rgba(239,68,68,.3);border-color:rgba(239,68,68,.5)">⏹ Terminer</button>
+          </div>
+        </div>
+      </div>
+      <!-- Upcoming -->
+      <div style="margin-bottom:1rem;font-size:.95rem;font-weight:700;color:var(--text)">📅 Prochaines sessions</div>
+      <div class="lives-grid">
+        <div class="live-card"><div class="live-card-header"><span class="live-course-badge">UI/UX Avancé</span><span class="live-status ls-upcoming">⏰ Dans 2 jours</span></div><div class="live-card-title">Workshop : Créer un Design System complet</div><div class="live-card-desc">Session pratique pour créer votre premier design system de A à Z avec Figma.</div><div class="live-card-footer"><span>📅 15 Avr · 18h00 – 20h00</span><span class="live-attendees">👥 47 inscrits</span></div></div>
+        <div class="live-card"><div class="live-card-header"><span class="live-course-badge">HTML & CSS Pro</span><span class="live-status ls-upcoming">⏰ Dans 5 jours</span></div><div class="live-card-title">Live Coding – Responsive Design avancé</div><div class="live-card-desc">On code ensemble une page complexe avec CSS Grid, Flexbox et les media queries.</div><div class="live-card-footer"><span>📅 18 Avr · 19h00 – 21h00</span><span class="live-attendees">👥 31 inscrits</span></div></div>
+        <div class="live-card"><div class="live-card-header"><span class="live-course-badge">UI/UX Avancé</span><span class="live-status ls-upcoming">⏰ Dans 12 jours</span></div><div class="live-card-title">Prototypage avancé et micro-animations</div><div class="live-card-desc">Découvrez les techniques de prototypage avancées et les micro-animations Figma.</div><div class="live-card-footer"><span>📅 25 Avr · 17h30 – 19h30</span><span class="live-attendees">👥 38 inscrits</span></div></div>
+      </div>
+      <!-- Past sessions -->
+      <div style="margin-bottom:1rem;font-size:.95rem;font-weight:700;color:var(--text)">🗂 Sessions passées</div>
+      <div class="card">
+        <table class="full-table">
+          <thead><tr><th>Titre</th><th>Cours</th><th>Date</th><th>Durée</th><th>Participants</th><th>Enregistrement</th></tr></thead>
+          <tbody>
+            <tr><td style="font-weight:600;font-size:.83rem">Introduction aux systèmes de grilles</td><td style="font-size:.78rem">UI/UX Avancé</td><td style="font-size:.78rem;color:var(--muted)">1 Avr 2026</td><td style="font-size:.78rem">1h45</td><td style="font-weight:700">42</td><td><button class="action-btn">▶ Replay</button></td></tr>
+            <tr><td style="font-weight:600;font-size:.83rem">CSS Variables & Custom Properties</td><td style="font-size:.78rem">HTML & CSS Pro</td><td style="font-size:.78rem;color:var(--muted)">25 Mar 2026</td><td style="font-size:.78rem">2h00</td><td style="font-weight:700">28</td><td><button class="action-btn">▶ Replay</button></td></tr>
+            <tr><td style="font-weight:600;font-size:.83rem">Atelier Figma – Illustrations vectorielles</td><td style="font-size:.78rem">Figma Masterclass</td><td style="font-size:.78rem;color:var(--muted)">18 Mar 2026</td><td style="font-size:.78rem">1h30</td><td style="font-weight:700">35</td><td><button class="action-btn">▶ Replay</button></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: MESSAGES ========== -->
+    <div class="page" id="page-messages">
+      <div class="page-header" style="margin-bottom:1.25rem">
+        <div>
+          <div class="page-title">💬 <span>Messages</span></div>
+          <div style="font-size:.82rem;color:var(--muted);margin-top:.25rem">4 messages non lus</div>
+        </div>
+      </div>
+      <div class="messages-layout">
+        <!-- Thread list -->
+        <div class="msg-list">
+          <div class="msg-list-header">
+            <div class="msg-list-title">Conversations</div>
+            <span style="background:var(--danger);color:#fff;font-size:.65rem;font-weight:700;padding:.2rem .5rem;border-radius:999px">4</span>
+          </div>
+          <div class="msg-search"><span>🔍</span><input placeholder="Rechercher…"/></div>
+          <div class="msg-thread active"><div class="mt-avatar s-a1">KM</div><div class="mt-info"><div class="mt-name">Koffi Mensah</div><div class="mt-preview">Bonjour, j'ai une question sur le module 18…</div></div><div class="mt-right"><div class="mt-time">5 min</div><div class="mt-unread">1</div></div></div>
+          <div class="msg-thread"><div class="mt-avatar s-a3">SL</div><div class="mt-info"><div class="mt-name">Sara Lima</div><div class="mt-preview">Est-ce que le prochain live est confirmé ?</div></div><div class="mt-right"><div class="mt-time">2h</div><div class="mt-unread">2</div></div></div>
+          <div class="msg-thread"><div class="mt-avatar s-a4">YD</div><div class="mt-info"><div class="mt-name">Yann Diallo</div><div class="mt-preview">J'ai soumis mon devoir, pouvez-vous vérifier ?</div></div><div class="mt-right"><div class="mt-time">3h</div><div class="mt-unread">1</div></div></div>
+          <div class="msg-thread"><div class="mt-avatar s-a2">AB</div><div class="mt-info"><div class="mt-name">Amara Bah</div><div class="mt-preview">Merci pour les corrections ! Super cours 🙏</div></div><div class="mt-right"><div class="mt-time">1j</div></div></div>
+          <div class="msg-thread"><div class="mt-avatar s-a5">EN</div><div class="mt-info"><div class="mt-name">Eva Nkosi</div><div class="mt-preview">Quand sort le module 19 ?</div></div><div class="mt-right"><div class="mt-time">2j</div></div></div>
+        </div>
+        <!-- Conversation -->
+        <div class="msg-conversation">
+          <div class="conv-header">
+            <div class="mt-avatar s-a1">KM</div>
+            <div><div class="conv-name">Koffi Mensah</div><div class="conv-course">UI/UX Design Avancé · 78% complété</div></div>
+          </div>
+          <div class="conv-messages">
+            <div class="msg-bubble"><div class="bubble-av s-a1">KM</div><div class="bubble-content"><div class="bubble-text">Bonjour Marie, j'ai une question concernant le module 18 sur les Design Systems.</div><div class="bubble-time">Aujourd'hui · 10:24</div></div></div>
+            <div class="msg-bubble"><div class="bubble-av s-a1">KM</div><div class="bubble-content"><div class="bubble-text">Je n'arrive pas à comprendre la différence entre les tokens de design et les variables Figma. Est-ce que vous pouvez m'expliquer ?</div><div class="bubble-time">10:25</div></div></div>
+            <div class="msg-bubble mine"><div class="bubble-av" style="background:linear-gradient(135deg,var(--accent),var(--primary))">MD</div><div class="bubble-content"><div class="bubble-text">Bonjour Koffi ! Bonne question 😊 Les tokens de design sont des valeurs abstraites (ex: color.primary) qui représentent des décisions de design, tandis que les variables Figma sont leur implémentation technique dans l'outil.</div><div class="bubble-time">10:32</div></div></div>
+            <div class="msg-bubble mine"><div class="bubble-av" style="background:linear-gradient(135deg,var(--accent),var(--primary))">MD</div><div class="bubble-content"><div class="bubble-text">Je vais couvrir ça en détail lors de la prochaine session live le 15 avril. Je te conseille de regarder la vidéo bonus du module 17 en attendant 👍</div><div class="bubble-time">10:33</div></div></div>
+            <div class="msg-bubble"><div class="bubble-av s-a1">KM</div><div class="bubble-content"><div class="bubble-text">Merci beaucoup ! Je vais regarder ça. À quel moment dans la vidéo du module 17 est-ce abordé ?</div><div class="bubble-time">Il y a 5 min</div></div></div>
+          </div>
+          <div class="conv-input">
+            <input placeholder="Écrire un message…"/>
+            <button class="send-btn">Envoyer ✈️</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========== PAGE: PROFIL ========== -->
+    <div class="page" id="page-profil">
+      <div class="page-header">
+        <div class="page-title">Mon <span>Profil</span></div>
+        <button class="btn btn-primary">💾 Sauvegarder les modifications</button>
+      </div>
+      <div class="profile-layout">
+        <!-- Left card -->
+        <div>
+          <div class="profile-card">
+            <div class="profile-avatar">MD</div>
+            <div class="profile-name">Marie Dubois</div>
+            <div class="profile-title">Formatrice UI/UX & Design</div>
+            <div class="profile-verified">✅ Formateur vérifié</div>
+            <div class="profile-stats">
+              <div class="prof-stat"><div class="ps-val">8</div><div class="ps-lbl">Cours</div></div>
+              <div class="prof-stat"><div class="ps-val">312</div><div class="ps-lbl">Étudiants</div></div>
+              <div class="prof-stat"><div class="ps-val">4.9★</div><div class="ps-lbl">Note</div></div>
+            </div>
+            <div class="profile-bio">Formatrice spécialisée en UI/UX Design et systèmes de design. 8 ans d'expérience en design produit. Passionnée par la transmission et l'éducation numérique.</div>
+            <div style="margin-bottom:.85rem">
+              <div style="font-size:.78rem;font-weight:700;color:var(--text);margin-bottom:.5rem">Expertises</div>
+              <div class="profile-skills">
+                <span class="skill-tag">Figma</span>
+                <span class="skill-tag">UI/UX</span>
+                <span class="skill-tag">Design System</span>
+                <span class="skill-tag">CSS</span>
+                <span class="skill-tag">Prototypage</span>
+                <span class="skill-tag">Adobe XD</span>
+              </div>
+            </div>
+            <button class="btn btn-outline" style="width:100%;justify-content:center">📷 Changer la photo</button>
+          </div>
+        </div>
+        <!-- Right forms -->
+        <div style="display:flex;flex-direction:column;gap:1.5rem">
+          <div class="card">
+            <div class="card-header" style="margin-bottom:1.25rem"><div class="card-title">👤 Informations personnelles</div></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Prénom</label><input class="form-input" value="Marie"/></div>
+              <div class="form-group"><label class="form-label">Nom</label><input class="form-input" value="Dubois"/></div>
+            </div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Email</label><input class="form-input" value="marie.dubois@email.com"/></div>
+              <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" value="+33 6 12 34 56 78"/></div>
+            </div>
+            <div class="form-group"><label class="form-label">Bio / À propos</label><textarea class="form-input" rows="3" style="resize:vertical">Formatrice spécialisée en UI/UX Design et systèmes de design. 8 ans d'expérience en design produit.</textarea></div>
+            <div class="form-group"><label class="form-label">Expertise principale</label><input class="form-input" value="UI/UX Design, Figma, Design Systems"/></div>
+          </div>
+          <div class="card">
+            <div class="card-header" style="margin-bottom:1.25rem"><div class="card-title">💳 Informations bancaires</div></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">IBAN</label><input class="form-input" value="FR76 3000 4000 0300 0000 4821 43"/></div>
+              <div class="form-group"><label class="form-label">BIC/SWIFT</label><input class="form-input" value="BNPAFRPPXXX"/></div>
+            </div>
+            <div style="padding:.85rem;background:#fef3c7;border-radius:12px;border:1px solid #fde68a;font-size:.78rem;color:#92400e">
+              ⚠️ Les modifications bancaires nécessitent une vérification par l'équipe admin (48h).
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header" style="margin-bottom:1.25rem"><div class="card-title">🔒 Sécurité</div></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Mot de passe actuel</label><input class="form-input" type="password" value="••••••••"/></div>
+              <div class="form-group"><label class="form-label">Nouveau mot de passe</label><input class="form-input" type="password" placeholder="Nouveau mot de passe"/></div>
+            </div>
+            <button class="btn btn-outline">🔒 Modifier le mot de passe</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+function showPage(pageId, navEl) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + pageId).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (navEl) navEl.classList.add('active');
+  const titles = {
+    dashboard: 'Tableau de bord <span>Formateur</span>',
+    cours: 'Mes <span>Cours</span>',
+    etudiants: 'Mes <span>Étudiants</span>',
+    revenus: 'Mes <span>Revenus</span>',
+    lives: 'Sessions <span>Live</span>',
+    messages: '<span>Messages</span>',
+    profil: 'Mon <span>Profil</span>'
+  };
+  document.getElementById('topbarTitle').innerHTML = titles[pageId] || pageId;
+  window.scrollTo(0,0);
+}
+document.querySelectorAll('.filters-bar, .students-filters').forEach(bar => {
+  bar.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      bar.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+    });
+  });
+});
+document.querySelectorAll('.msg-thread').forEach(thread => {
+  thread.addEventListener('click', () => {
+    document.querySelectorAll('.msg-thread').forEach(t => t.classList.remove('active'));
+    thread.classList.add('active');
+  });
+});
+
+// Hamburger menu
+const hamburgerBtn = document.getElementById('hamburgerBtn');
+const sidebar = document.querySelector('.sidebar');
+let overlay = document.querySelector('.sidebar-overlay');
+if (!overlay) {
+  overlay = document.createElement('div');
+  overlay.className = 'sidebar-overlay';
+  document.body.appendChild(overlay);
+}
+function toggleSidebar() {
+  sidebar.classList.toggle('open');
+  overlay.classList.toggle('open');
+}
+hamburgerBtn.addEventListener('click', toggleSidebar);
+overlay.addEventListener('click', toggleSidebar);
+// Close sidebar on nav item click (mobile)
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) {
+      sidebar.classList.remove('open');
+      overlay.classList.remove('open');
+    }
+  });
+});
+
+</script>
+</body>
+</html>

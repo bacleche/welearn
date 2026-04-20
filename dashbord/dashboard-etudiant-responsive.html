@@ -1,0 +1,1271 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<title>ICONNECT – Dashboard Étudiant</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ===================== RESET & VARIABLES ===================== */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --primary:#4f46e5;--primary-d:#3730a3;--primary-l:#ede9fe;--primary-xl:#f5f3ff;
+  --accent:#06b6d4;--accent-l:#cffafe;
+  --success:#10b981;--success-l:#d1fae5;
+  --warning:#f59e0b;--warning-l:#fef3c7;
+  --danger:#ef4444;--danger-l:#fee2e2;
+  --bg:#f4f6fb;--surface:#fff;--text:#1e1b4b;--muted:#6b7280;--muted2:#9ca3af;
+  --border:#e5e7eb;--border2:#ede9fe;
+  --r:12px;--r-lg:18px;--r-xl:22px;
+  --shadow:0 4px 24px rgba(79,70,229,.10);--shadow-sm:0 2px 10px rgba(0,0,0,.07);
+  --sidebar-w:260px;
+  --topbar-h:60px;
+  --bottomnav-h:64px;
+  --font:'Sora',sans-serif;--mono:'JetBrains Mono',monospace;
+  --transition:.2s ease;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:14px;min-height:100vh;overflow-x:hidden}
+
+/* ===================== LAYOUT SHELL ===================== */
+.app-shell{display:flex;min-height:100vh}
+
+/* ===================== SIDEBAR (desktop) ===================== */
+.sidebar{
+  width:var(--sidebar-w);min-height:100vh;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;bottom:0;z-index:100;overflow-y:auto;
+  transition:transform var(--transition);
+}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;backdrop-filter:blur(2px)}
+
+.sidebar-logo{padding:1.5rem 1.4rem 1rem;border-bottom:1px solid var(--border)}
+.logo-brand{font-size:1.45rem;font-weight:800;background:linear-gradient(135deg,var(--primary),var(--accent));-webkit-background-clip:text;-webkit-text-fill-color:transparent;letter-spacing:-.02em}
+.logo-sub{font-size:.6rem;color:var(--muted);font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:.1rem}
+
+.sidebar-user{display:flex;align-items:center;gap:.8rem;padding:1rem 1.4rem;border-bottom:1px solid var(--border);background:var(--primary-xl)}
+.s-avatar{width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.88rem;flex-shrink:0;border:2.5px solid rgba(79,70,229,.3)}
+.s-user-info .s-name{font-size:.85rem;font-weight:700;color:var(--text)}
+.s-user-info .s-role{font-size:.67rem;color:var(--muted);display:flex;align-items:center;gap:.3rem;margin-top:.1rem}
+.online-dot{width:7px;height:7px;border-radius:50%;background:var(--success);display:inline-block;flex-shrink:0}
+
+nav.sidebar-nav{flex:1;padding:.6rem 0;overflow-y:auto}
+.nav-section{padding:.7rem 1.4rem .15rem;font-size:.58rem;font-weight:700;color:var(--muted2);letter-spacing:.14em;text-transform:uppercase}
+.nav-item{display:flex;align-items:center;gap:.65rem;padding:.58rem 1.15rem;margin:.05rem .55rem;border-radius:var(--r);cursor:pointer;transition:all var(--transition);color:var(--muted);font-size:.82rem;font-weight:500;border:1.5px solid transparent;text-decoration:none}
+.nav-item:hover{background:var(--primary-l);color:var(--primary);border-color:var(--border2)}
+.nav-item.active{background:var(--primary);color:#fff;font-weight:600;box-shadow:0 4px 14px rgba(79,70,229,.28)}
+.nav-icon{font-size:.95rem;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--danger);color:#fff;font-size:.58rem;font-weight:700;padding:.1rem .4rem;border-radius:999px;min-width:17px;text-align:center;line-height:1.5}
+.nav-badge.green{background:var(--success)}
+
+.sidebar-footer{padding:1rem 1.4rem;border-top:1px solid var(--border)}
+.logout-btn{display:flex;align-items:center;gap:.65rem;color:var(--muted);font-size:.82rem;font-weight:500;cursor:pointer;padding:.5rem 0;transition:color var(--transition)}
+.logout-btn:hover{color:var(--danger)}
+
+/* ===================== MAIN AREA ===================== */
+.main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column;min-height:100vh;transition:margin var(--transition)}
+
+/* ===================== TOPBAR ===================== */
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 1.5rem;height:var(--topbar-h);display:flex;align-items:center;
+  justify-content:space-between;position:sticky;top:0;z-index:50;gap:.75rem
+}
+.topbar-left{display:flex;align-items:center;gap:.75rem}
+.hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:.3rem;border-radius:8px;transition:background var(--transition)}
+.hamburger:hover{background:var(--primary-l)}
+.hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all var(--transition)}
+.hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+.hamburger.open span:nth-child(2){opacity:0}
+.hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+.page-title{font-size:1rem;font-weight:700;color:var(--text);white-space:nowrap}
+.topbar-right{display:flex;align-items:center;gap:.6rem;margin-left:auto}
+.search-box{display:flex;align-items:center;gap:.45rem;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:.4rem .85rem;transition:border-color var(--transition)}
+.search-box:focus-within{border-color:var(--primary)}
+.search-box input{border:none;background:transparent;outline:none;font-family:var(--font);font-size:.82rem;color:var(--text);width:150px}
+.icon-btn{width:34px;height:34px;border-radius:var(--r);background:var(--bg);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:.9rem;position:relative;transition:all var(--transition);color:var(--muted);flex-shrink:0}
+.icon-btn:hover{border-color:var(--primary);background:var(--primary-l);color:var(--primary)}
+.notif-dot{position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--danger);border:2px solid var(--surface)}
+.topbar-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:.75rem;cursor:pointer;flex-shrink:0}
+
+/* ===================== CONTENT ===================== */
+.content{flex:1;padding:1.5rem;padding-bottom:calc(1.5rem + env(safe-area-inset-bottom))}
+.page{display:none}
+.page.active{display:block}
+
+/* ===================== BOTTOM NAV (mobile) ===================== */
+.bottom-nav{
+  display:none;position:fixed;bottom:0;left:0;right:0;z-index:90;
+  background:var(--surface);border-top:1px solid var(--border);
+  padding:.45rem 0 calc(.45rem + env(safe-area-inset-bottom));
+  display:none;align-items:stretch;
+  box-shadow:0 -4px 20px rgba(0,0,0,.08)
+}
+.bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.2rem;cursor:pointer;padding:.3rem .2rem;transition:color var(--transition);color:var(--muted);position:relative;min-width:0}
+.bottom-nav-item.active{color:var(--primary)}
+.bottom-nav-item .bn-icon{font-size:1.25rem;line-height:1}
+.bottom-nav-item .bn-label{font-size:.55rem;font-weight:600;letter-spacing:.02em;white-space:nowrap}
+.bottom-nav-item .bn-badge{position:absolute;top:.2rem;right:calc(50% - 20px);background:var(--danger);color:#fff;font-size:.55rem;font-weight:700;padding:.05rem .35rem;border-radius:999px;min-width:14px;text-align:center}
+.bottom-nav-item.active .bn-icon{transform:scale(1.1)}
+.bn-indicator{position:absolute;top:0;left:50%;transform:translateX(-50%);width:28px;height:3px;border-radius:0 0 3px 3px;background:var(--primary);opacity:0;transition:opacity var(--transition)}
+.bottom-nav-item.active .bn-indicator{opacity:1}
+
+/* ===================== COMMON COMPONENTS ===================== */
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1.25rem;gap:.75rem;flex-wrap:wrap}
+.section-title{font-size:1rem;font-weight:700;color:var(--text)}
+.section-sub{font-size:.75rem;color:var(--muted);margin-top:.15rem}
+.btn{display:inline-flex;align-items:center;gap:.42rem;padding:.5rem 1rem;border-radius:var(--r);font-family:var(--font);font-size:.8rem;font-weight:600;cursor:pointer;transition:all var(--transition);border:none;text-decoration:none;white-space:nowrap}
+.btn-primary{background:var(--primary);color:#fff;box-shadow:0 3px 10px rgba(79,70,229,.25)}
+.btn-primary:hover{background:var(--primary-d);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:var(--primary);border:1.5px solid var(--primary)}
+.btn-outline:hover{background:var(--primary-l)}
+.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border)}
+.btn-ghost:hover{border-color:var(--primary);color:var(--primary);background:var(--primary-l)}
+.btn-success{background:var(--success);color:#fff}
+.btn-danger{background:var(--danger);color:#fff}
+.btn-sm{padding:.36rem .75rem;font-size:.75rem}
+.btn-xs{padding:.25rem .55rem;font-size:.68rem}
+.btn-block{width:100%;justify-content:center}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.25rem}
+.card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;gap:.5rem;flex-wrap:wrap}
+.card-title{font-size:.92rem;font-weight:700;color:var(--text)}
+
+.tag{display:inline-flex;align-items:center;gap:.25rem;padding:.18rem .55rem;border-radius:999px;font-size:.65rem;font-weight:700}
+.tag-primary{background:var(--primary-l);color:var(--primary)}
+.tag-success{background:var(--success-l);color:var(--success)}
+.tag-warning{background:var(--warning-l);color:var(--warning)}
+.tag-danger{background:var(--danger-l);color:var(--danger)}
+.tag-cyan{background:var(--accent-l);color:var(--accent)}
+.tag-muted{background:var(--bg);color:var(--muted);border:1px solid var(--border)}
+
+.progress-bar{height:5px;background:var(--border);border-radius:999px;overflow:hidden}
+.progress-fill{height:100%;border-radius:999px;background:linear-gradient(90deg,var(--primary),var(--accent));transition:width .5s ease}
+.progress-fill.green{background:linear-gradient(90deg,var(--success),#34d399)}
+.progress-fill.yellow{background:linear-gradient(90deg,var(--warning),#fcd34d)}
+
+.divider{height:1px;background:var(--border);margin:.9rem 0}
+.text-muted{color:var(--muted)}
+.text-sm{font-size:.75rem}
+.fw-600{font-weight:600}
+.fw-700{font-weight:700}
+.mb-sm{margin-bottom:.65rem}
+.mb-md{margin-bottom:1.1rem}
+.mb-lg{margin-bottom:1.65rem}
+.mt-lg{margin-top:1.65rem}
+
+/* Grids */
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem}
+.g4{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem}
+.g-auto{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1.1rem}
+.flex{display:flex;align-items:center}
+.gap-xs{gap:.35rem}
+.gap-sm{gap:.6rem}
+.gap-md{gap:1rem}
+.gap-wrap{flex-wrap:wrap}
+.ml-auto{margin-left:auto}
+
+/* Avatars */
+.av{border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700;flex-shrink:0;background:linear-gradient(135deg,var(--primary),var(--accent));color:#fff}
+.av-sm{width:30px;height:30px;font-size:.72rem}
+.av-md{width:38px;height:38px;font-size:.85rem}
+.av-lg{width:52px;height:52px;font-size:1.1rem}
+.av-xl{width:70px;height:70px;font-size:1.5rem}
+
+/* Thumb colors */
+.t1{background:linear-gradient(135deg,#ede9fe,#c4b5fd)}
+.t2{background:linear-gradient(135deg,#cffafe,#a5f3fc)}
+.t3{background:linear-gradient(135deg,#d1fae5,#6ee7b7)}
+.t4{background:linear-gradient(135deg,#fef3c7,#fcd34d)}
+.t5{background:linear-gradient(135deg,#fce7f3,#f9a8d4)}
+.t6{background:linear-gradient(135deg,#fdf2f8,#fbcfe8)}
+.t7{background:linear-gradient(135deg,#f0f9ff,#bae6fd)}
+.t8{background:linear-gradient(135deg,#f7fee7,#d9f99d)}
+.star{color:#f59e0b}
+
+/* ===================== PAGE 1 – ACCUEIL ===================== */
+.welcome-banner{background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);border-radius:var(--r-xl);padding:1.5rem 1.75rem;margin-bottom:1.25rem;color:#fff;position:relative;overflow:hidden}
+.welcome-banner::before{content:'';position:absolute;right:-50px;top:-50px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none}
+.welcome-banner::after{content:'';position:absolute;right:60px;bottom:-60px;width:140px;height:140px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none}
+.welcome-top{display:flex;align-items:flex-start;justify-content:space-between;gap:.75rem;margin-bottom:.9rem}
+.welcome-text h2{font-size:1.25rem;font-weight:800;letter-spacing:-.02em;margin-bottom:.2rem}
+.welcome-text p{font-size:.82rem;opacity:.87}
+.welcome-cta{background:rgba(255,255,255,.2);backdrop-filter:blur(10px);border:1.5px solid rgba(255,255,255,.3);color:#fff;padding:.55rem 1.1rem;border-radius:var(--r);font-family:var(--font);font-size:.78rem;font-weight:600;cursor:pointer;transition:background var(--transition);white-space:nowrap;flex-shrink:0}
+.welcome-cta:hover{background:rgba(255,255,255,.3)}
+.welcome-stats{display:flex;gap:1.2rem;flex-wrap:wrap}
+.w-stat .val{font-size:1.35rem;font-weight:800;line-height:1;font-family:var(--mono)}
+.w-stat .lbl{font-size:.63rem;opacity:.8;margin-top:.15rem}
+
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.25rem}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.1rem;position:relative;overflow:hidden;transition:transform var(--transition),box-shadow var(--transition)}
+.kpi:hover{transform:translateY(-3px);box-shadow:var(--shadow)}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.kpi:nth-child(1)::before{background:linear-gradient(90deg,var(--primary),var(--accent))}
+.kpi:nth-child(2)::before{background:linear-gradient(90deg,var(--success),#34d399)}
+.kpi:nth-child(3)::before{background:linear-gradient(90deg,var(--warning),#fcd34d)}
+.kpi:nth-child(4)::before{background:linear-gradient(90deg,var(--accent),#67e8f9)}
+.kpi-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.5rem}
+.ki-p{background:var(--primary-l)} .ki-g{background:var(--success-l)} .ki-y{background:var(--warning-l)} .ki-c{background:var(--accent-l)}
+.kpi-val{font-size:1.55rem;font-weight:800;color:var(--text);line-height:1;font-family:var(--mono)}
+.kpi-label{font-size:.72rem;color:var(--muted);font-weight:500;margin-top:.15rem}
+.kpi-change{font-size:.68rem;font-weight:600;margin-top:.2rem}
+.kpi-change.up{color:var(--success)}
+
+.home-2col{display:grid;grid-template-columns:1.5fr 1fr;gap:1.1rem;margin-bottom:1.25rem}
+.course-item{display:flex;align-items:center;gap:.85rem;padding:.75rem 0;border-bottom:1px solid var(--border)}
+.course-item:last-child{border-bottom:none;padding-bottom:0}
+.course-thumb{width:46px;height:46px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.35rem;flex-shrink:0}
+.course-info{flex:1;min-width:0}
+.course-name{font-size:.83rem;font-weight:600;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.course-meta{font-size:.7rem;color:var(--muted)}
+.course-pct{font-size:.75rem;font-weight:700;color:var(--primary);white-space:nowrap;margin-left:.4rem}
+
+.schedule-item{display:flex;align-items:center;gap:.75rem;padding:.6rem;border-radius:var(--r);margin-bottom:.4rem;border:1px solid var(--border)}
+.schedule-time{text-align:center;min-width:46px}
+.s-time{font-size:.75rem;font-weight:700;color:var(--primary);font-family:var(--mono)}
+.s-day{font-size:.6rem;color:var(--muted)}
+.s-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.s-dot.p{background:var(--primary)} .s-dot.a{background:var(--accent)} .s-dot.s{background:var(--success)} .s-dot.w{background:var(--warning)}
+.s-info .sn{font-size:.78rem;font-weight:600;color:var(--text)}
+.s-info .ss{font-size:.68rem;color:var(--muted)}
+
+.home-3col{display:grid;grid-template-columns:repeat(3,1fr);gap:1.1rem}
+.chart-bars{display:flex;align-items:flex-end;gap:.3rem;height:72px;padding:.4rem .2rem 0;margin-bottom:.4rem}
+.bar{flex:1;background:var(--border);border-radius:3px 3px 0 0;transition:background var(--transition);cursor:pointer}
+.bar:hover,.bar.active{background:linear-gradient(180deg,var(--primary),var(--accent))}
+.bar-labels{display:flex;gap:.3rem;padding:0 .2rem}
+.bar-lbl{flex:1;text-align:center;font-size:.58rem;color:var(--muted)}
+.ach-item{display:flex;align-items:center;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.ach-item:last-child{border-bottom:none}
+.ach-icon{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0}
+.ai-g{background:var(--warning-l)} .ai-b{background:#dbeafe} .ai-p{background:var(--primary-l)} .ai-s{background:var(--success-l)}
+.ach-pts{margin-left:auto;font-size:.72rem;font-weight:700;color:var(--primary);font-family:var(--mono);white-space:nowrap}
+.rec-item{display:flex;align-items:center;gap:.75rem;padding:.55rem 0;border-bottom:1px solid var(--border)}
+.rec-item:last-child{border-bottom:none}
+.rec-thumb{width:40px;height:40px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.rec-action{margin-left:auto;font-size:.7rem;font-weight:600;color:var(--primary);cursor:pointer;white-space:nowrap}
+
+/* ===================== PAGE 2 – MES COURS ===================== */
+.filter-bar{display:flex;gap:.4rem;margin-bottom:1.1rem;flex-wrap:wrap;align-items:center}
+.ftab{padding:.38rem .85rem;border-radius:999px;font-size:.77rem;font-weight:600;cursor:pointer;transition:all var(--transition);border:1.5px solid var(--border);color:var(--muted);background:var(--surface);white-space:nowrap}
+.ftab:hover{border-color:var(--primary);color:var(--primary)}
+.ftab.active{background:var(--primary);color:#fff;border-color:var(--primary);box-shadow:0 3px 10px rgba(79,70,229,.22)}
+.sel{padding:.38rem .75rem;border-radius:var(--r);border:1.5px solid var(--border);font-family:var(--font);font-size:.77rem;color:var(--text);background:var(--surface);cursor:pointer}
+.sel:focus{outline:none;border-color:var(--primary)}
+
+.course-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:transform var(--transition),box-shadow var(--transition);display:flex;flex-direction:column}
+.course-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.cc-thumb{height:130px;display:flex;align-items:center;justify-content:center;font-size:3.2rem;position:relative}
+.cc-level{position:absolute;top:.65rem;right:.65rem}
+.cc-body{padding:1rem;flex:1;display:flex;flex-direction:column;gap:.45rem}
+.cc-title{font-size:.88rem;font-weight:700;color:var(--text);line-height:1.4}
+.cc-teacher{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:.35rem}
+.cc-meta{display:flex;align-items:center;gap:.7rem;font-size:.7rem;color:var(--muted);flex-wrap:wrap}
+.cc-prog-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.3rem}
+.cc-prog-label{font-size:.7rem;color:var(--muted)}
+.cc-prog-val{font-size:.75rem;font-weight:700;color:var(--primary)}
+.cc-last{font-size:.68rem;color:var(--muted2);margin-top:.25rem}
+.cc-footer{padding:.85rem 1rem;border-top:1px solid var(--border);display:flex;gap:.45rem}
+
+/* ===================== PAGE 3 – CATALOGUE ===================== */
+.cat-search{background:var(--surface);border:1.5px solid var(--border);border-radius:var(--r);padding:.55rem 1rem;display:flex;align-items:center;gap:.5rem;margin-bottom:1rem;transition:border-color var(--transition)}
+.cat-search:focus-within{border-color:var(--primary)}
+.cat-search input{border:none;background:transparent;outline:none;font-family:var(--font);font-size:.85rem;color:var(--text);flex:1}
+.cat-filters{display:flex;gap:.5rem;margin-bottom:.85rem;flex-wrap:nowrap;overflow-x:auto;padding-bottom:.3rem;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.cat-filters::-webkit-scrollbar{display:none}
+.chip{padding:.32rem .8rem;border-radius:999px;font-size:.75rem;font-weight:500;cursor:pointer;transition:all var(--transition);border:1.5px solid var(--border);color:var(--muted);background:var(--surface);white-space:nowrap;flex-shrink:0}
+.chip:hover,.chip.active{background:var(--primary-l);color:var(--primary);border-color:var(--border2)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:1rem}
+.cat-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);overflow:hidden;transition:transform var(--transition),box-shadow var(--transition);cursor:pointer}
+.cat-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.cat-thumb{height:120px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;position:relative}
+.price-badge{position:absolute;bottom:.55rem;right:.55rem;background:var(--text);color:#fff;font-size:.68rem;font-weight:700;padding:.18rem .5rem;border-radius:6px;font-family:var(--mono)}
+.price-badge.free{background:var(--success)}
+.cat-body{padding:.9rem}
+.cat-title{font-size:.85rem;font-weight:700;color:var(--text);margin-bottom:.3rem;line-height:1.4}
+.cat-teacher{font-size:.7rem;color:var(--muted);margin-bottom:.4rem}
+.cat-rating{display:flex;align-items:center;gap:.3rem;font-size:.7rem;margin-bottom:.5rem}
+.cat-footer{display:flex;align-items:center;justify-content:space-between;padding-top:.5rem;border-top:1px solid var(--border);font-size:.7rem;color:var(--muted)}
+
+/* ===================== PAGE 4 – LIVE ===================== */
+.live-hero{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 50%,#1e40af 100%);border-radius:var(--r-xl);padding:1.5rem;margin-bottom:1.25rem;color:#fff;position:relative;overflow:hidden}
+.live-hero::before{content:'';position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.04)}
+.live-badge{display:inline-flex;align-items:center;gap:.35rem;background:var(--danger);color:#fff;font-size:.68rem;font-weight:700;padding:.25rem .65rem;border-radius:999px;margin-bottom:.75rem;animation:pulse-live 1.5s infinite}
+@keyframes pulse-live{0%,100%{box-shadow:0 0 0 0 rgba(239,68,68,.4)}50%{box-shadow:0 0 0 6px rgba(239,68,68,0)}}
+.live-title{font-size:1.2rem;font-weight:800;margin-bottom:.4rem;letter-spacing:-.02em}
+.live-meta{font-size:.8rem;opacity:.8;margin-bottom:1rem}
+.live-actions{display:flex;gap:.6rem;flex-wrap:wrap}
+.btn-live-join{display:inline-flex;align-items:center;gap:.45rem;padding:.58rem 1.2rem;border-radius:var(--r);font-family:var(--font);font-size:.82rem;font-weight:700;cursor:pointer;border:none;background:#fff;color:var(--primary);transition:all var(--transition)}
+.btn-live-join:hover{background:var(--primary-l)}
+.btn-live-ghost{display:inline-flex;align-items:center;gap:.45rem;padding:.58rem 1rem;border-radius:var(--r);font-family:var(--font);font-size:.82rem;font-weight:600;cursor:pointer;background:rgba(255,255,255,.15);color:#fff;border:1.5px solid rgba(255,255,255,.3);transition:all var(--transition)}
+.btn-live-ghost:hover{background:rgba(255,255,255,.25)}
+
+.live-session{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.1rem;display:flex;align-items:center;gap:1rem;margin-bottom:.65rem;transition:all var(--transition)}
+.live-session:hover{border-color:var(--border2);box-shadow:var(--shadow-sm)}
+.ls-date{text-align:center;min-width:52px;padding:.55rem .4rem;background:var(--primary-xl);border-radius:var(--r);flex-shrink:0}
+.ls-day{font-size:1.3rem;font-weight:800;color:var(--primary);line-height:1;font-family:var(--mono)}
+.ls-month{font-size:.6rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.ls-info{flex:1;min-width:0}
+.ls-title{font-size:.87rem;font-weight:700;color:var(--text);margin-bottom:.18rem}
+.ls-meta{font-size:.72rem;color:var(--muted);display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.ls-right{text-align:right;flex-shrink:0}
+.ls-countdown{font-size:.72rem;font-weight:600;color:var(--warning);font-family:var(--mono);white-space:nowrap}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--danger);margin-right:.25rem;animation:pulse-dot 1s infinite}
+
+/* ===================== PAGE 5 – CERTIFICATS ===================== */
+.cert-preview{background:linear-gradient(135deg,var(--primary) 0%,#6366f1 50%,var(--accent) 100%);border-radius:var(--r-xl);padding:2rem 1.5rem;text-align:center;color:#fff;margin-bottom:1.5rem;position:relative;overflow:hidden}
+.cert-preview::before{content:'';position:absolute;inset:8px;border:2px solid rgba(255,255,255,.2);border-radius:calc(var(--r-xl) - 4px);pointer-events:none}
+.cert-logo{font-size:2.2rem;margin-bottom:.5rem}
+.cert-sub-text{font-size:.65rem;opacity:.8;letter-spacing:.12em;text-transform:uppercase;margin-bottom:.4rem}
+.cert-student{font-size:1.5rem;font-weight:800;margin:.4rem 0;letter-spacing:-.02em}
+.cert-course-name{font-size:.95rem;font-weight:700;background:rgba(255,255,255,.15);padding:.4rem 1.25rem;border-radius:999px;display:inline-block;margin:.6rem 0}
+.cert-id-display{font-family:var(--mono);font-size:.7rem;opacity:.65}
+.cert-actions{display:flex;gap:.6rem;justify-content:center;margin-top:.85rem;flex-wrap:wrap}
+
+.certificate-card{background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r-xl);padding:1.4rem;display:flex;align-items:center;gap:1.1rem;margin-bottom:.85rem;position:relative;overflow:hidden;transition:transform var(--transition),box-shadow var(--transition)}
+.certificate-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.certificate-card::before{content:'';position:absolute;top:0;bottom:0;left:0;width:4px;background:linear-gradient(180deg,var(--primary),var(--accent))}
+.cert-icon{width:54px;height:54px;border-radius:13px;background:linear-gradient(135deg,var(--primary-l),var(--accent-l));display:flex;align-items:center;justify-content:center;font-size:1.65rem;flex-shrink:0}
+.cert-info{flex:1;min-width:0}
+.cert-title{font-size:.9rem;font-weight:700;color:var(--text);margin-bottom:.15rem}
+.cert-course{font-size:.75rem;color:var(--muted);margin-bottom:.35rem}
+.cert-meta{display:flex;align-items:center;gap:.7rem;font-size:.7rem;color:var(--muted);flex-wrap:wrap}
+.cert-id{font-family:var(--mono);color:var(--primary);font-size:.68rem;margin-top:.2rem}
+.cert-cta{display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;flex-shrink:0}
+
+/* ===================== PAGE 6 – PROGRÈS ===================== */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:.9rem;margin-bottom:1.25rem}
+.mini-stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1rem;text-align:center}
+.mini-val{font-size:1.45rem;font-weight:800;color:var(--text);font-family:var(--mono);line-height:1}
+.mini-lbl{font-size:.68rem;color:var(--muted);margin-top:.2rem}
+.ach-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:.75rem}
+.ach-cell{text-align:center;padding:.85rem .5rem;border-radius:var(--r);border:1px solid var(--border)}
+.ach-cell.locked{border-style:dashed;opacity:.5}
+.ach-cell-icon{font-size:1.75rem;margin-bottom:.3rem}
+.ach-cell-name{font-size:.75rem;font-weight:600;color:var(--text)}
+.ach-cell-sub{font-size:.65rem;color:var(--muted)}
+
+/* ===================== PAGE 7 – MESSAGES ===================== */
+.messages-layout{display:grid;grid-template-columns:280px 1fr;gap:1.1rem;height:calc(100vh - 110px)}
+.conv-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);display:flex;flex-direction:column;overflow:hidden}
+.conv-search{padding:.75rem;border-bottom:1px solid var(--border)}
+.cs-box{display:flex;align-items:center;gap:.45rem;background:var(--bg);border:1.5px solid var(--border);border-radius:var(--r);padding:.38rem .7rem}
+.cs-box input{border:none;background:transparent;outline:none;font-family:var(--font);font-size:.8rem;color:var(--text);flex:1}
+.conv-list{flex:1;overflow-y:auto}
+.conv-item{display:flex;align-items:flex-start;gap:.75rem;padding:.8rem;cursor:pointer;border-bottom:1px solid var(--border);transition:background var(--transition);position:relative}
+.conv-item:hover{background:var(--bg)}
+.conv-item.active{background:var(--primary-xl)}
+.conv-av{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:.82rem;font-weight:700;color:#fff;flex-shrink:0}
+.conv-info{flex:1;min-width:0}
+.conv-name{font-size:.83rem;font-weight:700;color:var(--text)}
+.conv-preview{font-size:.72rem;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.08rem}
+.conv-time{font-size:.62rem;color:var(--muted2);white-space:nowrap}
+.conv-unread{position:absolute;top:.9rem;right:.75rem;width:17px;height:17px;border-radius:50%;background:var(--primary);color:#fff;font-size:.58rem;font-weight:700;display:flex;align-items:center;justify-content:center}
+
+.chat-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);display:flex;flex-direction:column;overflow:hidden}
+.chat-header{padding:.85rem 1.1rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:.8rem}
+.chat-online{width:8px;height:8px;border-radius:50%;background:var(--success);flex-shrink:0}
+.chat-body{flex:1;overflow-y:auto;padding:1.1rem;display:flex;flex-direction:column;gap:.85rem;background:var(--bg)}
+.msg-row{display:flex;gap:.65rem;align-items:flex-end}
+.msg-row.sent{flex-direction:row-reverse}
+.msg-bubble{max-width:72%;padding:.65rem .9rem;border-radius:14px;font-size:.82rem;line-height:1.55}
+.msg-bubble.received{background:var(--surface);border:1px solid var(--border);border-bottom-left-radius:4px}
+.msg-bubble.sent{background:var(--primary);color:#fff;border-bottom-right-radius:4px}
+.msg-time{font-size:.6rem;color:var(--muted2);margin-top:.15rem;padding:0 .2rem}
+.msg-time.sent{text-align:right}
+.chat-input-area{padding:.75rem 1rem;border-top:1px solid var(--border);display:flex;align-items:center;gap:.65rem}
+.chat-input{flex:1;padding:.55rem .85rem;border:1.5px solid var(--border);border-radius:999px;font-family:var(--font);font-size:.83rem;background:var(--bg);color:var(--text);transition:border-color var(--transition)}
+.chat-input:focus{outline:none;border-color:var(--primary)}
+.chat-send{width:36px;height:36px;border-radius:50%;background:var(--primary);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;flex-shrink:0}
+
+/* ===================== PAGE 8 – PAIEMENTS ===================== */
+.pay-summary{display:grid;grid-template-columns:repeat(3,1fr);gap:.9rem;margin-bottom:1.25rem}
+.pay-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:1.1rem}
+.pay-icon{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.1rem;margin-bottom:.5rem}
+.pay-amount{font-size:1.3rem;font-weight:800;color:var(--text);font-family:var(--mono)}
+.pay-label{font-size:.72rem;color:var(--muted);margin-top:.1rem}
+.pay-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.pay-table{width:100%;border-collapse:collapse;min-width:560px}
+.pay-table th{text-align:left;padding:.65rem .9rem;font-size:.7rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:1.5px solid var(--border);white-space:nowrap}
+.pay-table td{padding:.8rem .9rem;font-size:.8rem;border-bottom:1px solid var(--border);vertical-align:middle}
+.pay-table tr:last-child td{border-bottom:none}
+.pay-table tr:hover td{background:var(--primary-xl)}
+.pay-status{display:inline-flex;align-items:center;gap:.25rem;font-size:.68rem;font-weight:600;padding:.18rem .55rem;border-radius:999px}
+.ps-ok{background:var(--success-l);color:var(--success)} .ps-wait{background:var(--warning-l);color:var(--warning)} .ps-fail{background:var(--danger-l);color:var(--danger)}
+
+/* ===================== PAGE 9 – PROFIL ===================== */
+.profile-header{background:linear-gradient(135deg,var(--primary) 0%,var(--accent) 100%);border-radius:var(--r-xl);padding:1.75rem;margin-bottom:1.5rem;color:#fff;display:flex;align-items:center;gap:1.5rem;position:relative;overflow:hidden;flex-wrap:wrap}
+.profile-header::before{content:'';position:absolute;right:-50px;top:-50px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,.06)}
+.ph-avatar{width:76px;height:76px;border-radius:50%;background:rgba(255,255,255,.2);border:3px solid rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;font-size:1.8rem;font-weight:800;flex-shrink:0}
+.ph-info h2{font-size:1.35rem;font-weight:800;margin-bottom:.15rem;letter-spacing:-.02em}
+.ph-info .ph-email{font-size:.8rem;opacity:.85}
+.ph-info .ph-joined{font-size:.72rem;opacity:.7;margin-top:.2rem}
+.ph-badges{display:flex;gap:.4rem;margin-top:.6rem;flex-wrap:wrap}
+.ph-badge{background:rgba(255,255,255,.18);border:1px solid rgba(255,255,255,.3);color:#fff;font-size:.65rem;font-weight:600;padding:.2rem .6rem;border-radius:999px}
+.ph-cta{margin-left:auto;display:flex;flex-direction:column;gap:.4rem;align-items:flex-end;flex-shrink:0}
+
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:.35rem}
+.form-group.full{grid-column:1/-1}
+.form-label{font-size:.78rem;font-weight:600;color:var(--text)}
+.form-input{padding:.58rem .85rem;border:1.5px solid var(--border);border-radius:var(--r);font-family:var(--font);font-size:.83rem;color:var(--text);background:var(--surface);transition:border-color var(--transition)}
+.form-input:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px rgba(79,70,229,.07)}
+.form-textarea{resize:vertical;min-height:80px}
+.form-hint{font-size:.68rem;color:var(--muted)}
+.form-select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b7280' d='M6 8L1 3h10z'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .7rem center}
+.skill-tag{display:inline-flex;align-items:center;gap:.3rem;background:var(--primary-l);color:var(--primary);font-size:.72rem;font-weight:600;padding:.25rem .65rem;border-radius:999px;margin:.18rem}
+.skill-tag .rm{cursor:pointer;opacity:.6}
+.skills-area{border:1.5px dashed var(--border);border-radius:var(--r);padding:.65rem;min-height:54px;display:flex;flex-wrap:wrap;align-items:flex-start;gap:.15rem}
+
+/* ===================== PAGE 10 – PARAMÈTRES ===================== */
+.settings-layout{display:grid;grid-template-columns:200px 1fr;gap:1.25rem}
+.settings-nav{background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);padding:.65rem;height:fit-content;position:sticky;top:72px}
+.sn-item{display:flex;align-items:center;gap:.6rem;padding:.58rem .85rem;border-radius:var(--r);cursor:pointer;transition:all var(--transition);font-size:.8rem;font-weight:500;color:var(--muted)}
+.sn-item:hover{background:var(--bg);color:var(--text)}
+.sn-item.active{background:var(--primary-l);color:var(--primary);font-weight:600}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:.85rem 0;border-bottom:1px solid var(--border);gap:1rem}
+.toggle-row:last-child{border-bottom:none}
+.toggle-info .tl{font-size:.83rem;font-weight:600;color:var(--text)}
+.toggle-info .ts{font-size:.72rem;color:var(--muted);margin-top:.1rem}
+.toggle{width:40px;height:22px;border-radius:999px;background:var(--border);cursor:pointer;position:relative;transition:background var(--transition);flex-shrink:0;border:none}
+.toggle.on{background:var(--primary)}
+.toggle::after{content:'';position:absolute;top:3px;left:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:transform var(--transition);box-shadow:0 1px 4px rgba(0,0,0,.15)}
+.toggle.on::after{transform:translateX(18px)}
+.danger-zone{border:1.5px solid #fecaca;border-radius:var(--r-lg);padding:1.25rem;margin-top:1.25rem}
+.danger-title{color:var(--danger);font-weight:700;font-size:.88rem;display:flex;align-items:center;gap:.45rem;margin-bottom:.3rem}
+.danger-sub{font-size:.78rem;color:var(--muted);margin-bottom:.9rem}
+
+/* ===================== RESPONSIVE BREAKPOINTS ===================== */
+
+/* Tablet landscape – 1100px */
+@media(max-width:1100px){
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .home-2col{grid-template-columns:1fr}
+  .home-3col{grid-template-columns:1fr 1fr}
+  .ach-grid{grid-template-columns:repeat(3,1fr)}
+  .messages-layout{grid-template-columns:250px 1fr}
+}
+
+/* Tablet portrait – 900px */
+@media(max-width:900px){
+  :root{--sidebar-w:240px}
+  .kpi-grid{grid-template-columns:repeat(2,1fr)}
+  .home-3col{grid-template-columns:1fr}
+  .g2,.g3,.g4{grid-template-columns:1fr 1fr}
+  .cat-grid{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+  .stats-row{grid-template-columns:repeat(2,1fr)}
+  .pay-summary{grid-template-columns:1fr 1fr}
+  .settings-layout{grid-template-columns:1fr}
+  .settings-nav{position:static}
+  .form-row{grid-template-columns:1fr}
+  .form-group.full{grid-column:1}
+  .ph-cta{margin-left:0;flex-direction:row;align-items:center;width:100%}
+  .profile-header{flex-direction:column;align-items:flex-start}
+}
+
+/* Mobile – 768px: switch to bottom nav */
+@media(max-width:768px){
+  :root{--topbar-h:56px}
+  .sidebar{transform:translateX(-100%)}
+  .sidebar.open{transform:translateX(0)}
+  .sidebar-overlay.show{display:block}
+  .main{margin-left:0}
+  .hamburger{display:flex}
+  .search-box{display:none}
+  .bottom-nav{display:flex}
+  .content{padding:1rem;padding-bottom:calc(var(--bottomnav-h) + 1rem + env(safe-area-inset-bottom))}
+
+  /* Adapt layouts for mobile */
+  .kpi-grid{grid-template-columns:1fr 1fr;gap:.75rem}
+  .home-2col{grid-template-columns:1fr;gap:.85rem}
+  .home-3col{grid-template-columns:1fr;gap:.85rem}
+  .g2,.g3,.g4{grid-template-columns:1fr}
+  .g-auto{grid-template-columns:1fr}
+  .cat-grid{grid-template-columns:1fr}
+  .stats-row{grid-template-columns:1fr 1fr;gap:.65rem}
+  .ach-grid{grid-template-columns:1fr 1fr}
+  .pay-summary{grid-template-columns:1fr}
+  .settings-layout{grid-template-columns:1fr}
+  .settings-nav{position:static;display:grid;grid-template-columns:1fr 1fr;gap:.35rem}
+
+  /* Messages: hide conv panel, show only chat */
+  .messages-layout{grid-template-columns:1fr;height:auto}
+  .conv-panel{display:none}
+  .chat-panel{height:calc(100vh - 180px)}
+
+  /* Filter bar scrollable */
+  .filter-bar{flex-nowrap:nowrap;overflow-x:auto;flex-wrap:nowrap;padding-bottom:.35rem;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .filter-bar::-webkit-scrollbar{display:none}
+  .ftab{flex-shrink:0}
+
+  /* Welcome */
+  .welcome-top{flex-direction:column;gap:.75rem}
+  .welcome-cta{align-self:flex-start}
+  .welcome-stats{gap:.9rem}
+
+  /* Course card thumb smaller */
+  .cc-thumb{height:110px;font-size:2.6rem}
+  .cert-cta{flex-direction:row;flex-wrap:wrap}
+  .certificate-card{flex-direction:column;align-items:flex-start;gap:.75rem}
+  .cert-cta{align-items:flex-start}
+  .profile-header{padding:1.25rem}
+  .ph-avatar{width:60px;height:60px;font-size:1.4rem}
+  .ph-cta{margin-top:.5rem}
+  .form-row{grid-template-columns:1fr}
+  .live-hero{padding:1.1rem}
+  .live-title{font-size:1rem}
+  .live-session{flex-wrap:wrap}
+  .ls-right{width:100%;text-align:left;margin-top:.4rem;display:flex;gap:.5rem;align-items:center}
+  .cert-preview{padding:1.4rem 1rem}
+  .cert-student{font-size:1.2rem}
+
+  /* Pay table mobile card style */
+  .pay-table-wrap{overflow-x:auto}
+}
+
+/* Small mobile – 480px */
+@media(max-width:480px){
+  :root{--r:10px;--r-lg:14px;--r-xl:18px}
+  .content{padding:.85rem;padding-bottom:calc(var(--bottomnav-h) + .85rem + env(safe-area-inset-bottom))}
+  .kpi-grid{gap:.6rem}
+  .kpi{padding:.9rem}
+  .kpi-val{font-size:1.3rem}
+  .welcome-text h2{font-size:1.1rem}
+  .welcome-banner{padding:1.1rem 1.2rem}
+  .page-title{font-size:.9rem}
+  .card{padding:1rem}
+  .ach-grid{grid-template-columns:1fr 1fr}
+  .stats-row{grid-template-columns:1fr 1fr}
+  .cert-actions{flex-direction:column;align-items:center}
+  .pay-summary{grid-template-columns:1fr}
+  .profile-header{padding:1rem}
+  .bottom-nav-item .bn-label{font-size:.5rem}
+}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+<!-- ========== SIDEBAR OVERLAY ========== -->
+<div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+<!-- ========== SIDEBAR ========== -->
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-brand">ICONNECT</div>
+    <div class="logo-sub">Plateforme e-learning</div>
+  </div>
+  <div class="sidebar-user">
+    <div class="s-avatar">KA</div>
+    <div class="s-user-info">
+      <div class="s-name">Kofi Asante</div>
+      <div class="s-role"><span class="online-dot"></span> Étudiant · En ligne</div>
+    </div>
+  </div>
+  <nav class="sidebar-nav">
+    <div class="nav-section">Principal</div>
+    <a class="nav-item active" onclick="showPage('home')"><span class="nav-icon">🏠</span> Accueil</a>
+    <a class="nav-item" onclick="showPage('courses')"><span class="nav-icon">📚</span> Mes Cours <span class="nav-badge green">4</span></a>
+    <a class="nav-item" onclick="showPage('catalogue')"><span class="nav-icon">🔍</span> Catalogue</a>
+    <a class="nav-item" onclick="showPage('live')"><span class="nav-icon">📡</span> Sessions Live <span class="nav-badge">2</span></a>
+    <div class="nav-section">Progression</div>
+    <a class="nav-item" onclick="showPage('certificates')"><span class="nav-icon">🏆</span> Certificats</a>
+    <a class="nav-item" onclick="showPage('progress')"><span class="nav-icon">📈</span> Mes Progrès</a>
+    <div class="nav-section">Compte</div>
+    <a class="nav-item" onclick="showPage('messages')"><span class="nav-icon">💬</span> Messages <span class="nav-badge">3</span></a>
+    <a class="nav-item" onclick="showPage('payments')"><span class="nav-icon">💳</span> Paiements</a>
+    <a class="nav-item" onclick="showPage('profile')"><span class="nav-icon">👤</span> Mon Profil</a>
+    <a class="nav-item" onclick="showPage('settings')"><span class="nav-icon">⚙️</span> Paramètres</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="logout-btn"><span>🚪</span> Déconnexion</div>
+  </div>
+</aside>
+
+<!-- ========== MAIN ========== -->
+<div class="main">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="topbar-left">
+      <div class="hamburger" id="hamburger" onclick="toggleSidebar()">
+        <span></span><span></span><span></span>
+      </div>
+      <div class="page-title" id="page-title">🏠 Accueil</div>
+    </div>
+    <div class="topbar-right">
+      <div class="search-box">
+        <span style="color:var(--muted)">🔍</span>
+        <input type="text" placeholder="Rechercher..."/>
+      </div>
+      <div class="icon-btn">🔔<span class="notif-dot"></span></div>
+      <div class="topbar-avatar" onclick="showPage('profile')">KA</div>
+    </div>
+  </div>
+
+  <!-- CONTENT -->
+  <div class="content">
+
+    <!-- ================================================================ -->
+    <!-- PAGE 1 – ACCUEIL                                                 -->
+    <!-- ================================================================ -->
+    <div class="page active" id="page-home">
+
+      <!-- Welcome -->
+      <div class="welcome-banner mb-md">
+        <div class="welcome-top">
+          <div class="welcome-text">
+            <h2>Bonjour, Kofi ! 👋</h2>
+            <p>Continuez là où vous vous êtes arrêté.</p>
+          </div>
+          <button class="welcome-cta" onclick="showPage('courses')">▶ Reprendre</button>
+        </div>
+        <div class="welcome-stats">
+          <div class="w-stat"><div class="val">4</div><div class="lbl">Cours actifs</div></div>
+          <div class="w-stat"><div class="val">68%</div><div class="lbl">Progression</div></div>
+          <div class="w-stat"><div class="val">12h</div><div class="lbl">Cette semaine</div></div>
+          <div class="w-stat"><div class="val">225</div><div class="lbl">Points XP</div></div>
+        </div>
+      </div>
+
+      <!-- KPI -->
+      <div class="kpi-grid mb-md">
+        <div class="kpi"><div class="kpi-icon ki-p">📚</div><div class="kpi-val">4</div><div class="kpi-label">Cours inscrits</div><div class="kpi-change up">↑ +1 ce mois</div></div>
+        <div class="kpi"><div class="kpi-icon ki-g">✅</div><div class="kpi-val">1</div><div class="kpi-label">Cours terminés</div><div class="kpi-change up">↑ Récemment</div></div>
+        <div class="kpi"><div class="kpi-icon ki-y">⏱️</div><div class="kpi-val">42h</div><div class="kpi-label">Temps étudié</div><div class="kpi-change up">↑ +12h sem.</div></div>
+        <div class="kpi"><div class="kpi-icon ki-c">🏆</div><div class="kpi-val">2</div><div class="kpi-label">Certificats</div><div class="kpi-change up">↑ Nouveau !</div></div>
+      </div>
+
+      <!-- Cours + Planning -->
+      <div class="home-2col mb-md">
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📚 Cours en cours</div>
+            <button class="btn btn-ghost btn-xs" onclick="showPage('courses')">Voir tous →</button>
+          </div>
+          <div class="course-item">
+            <div class="course-thumb t1">🎨</div>
+            <div class="course-info">
+              <div class="course-name">Design UI/UX Avancé</div>
+              <div class="course-meta">Marie Dubois · 24 modules</div>
+              <div class="progress-bar" style="margin-top:.35rem"><div class="progress-fill" style="width:75%"></div></div>
+            </div>
+            <div class="course-pct">75%</div>
+          </div>
+          <div class="course-item">
+            <div class="course-thumb t2">💻</div>
+            <div class="course-info">
+              <div class="course-name">Full Stack Web Dev</div>
+              <div class="course-meta">Jean Konan · 36 modules</div>
+              <div class="progress-bar" style="margin-top:.35rem"><div class="progress-fill" style="width:55%"></div></div>
+            </div>
+            <div class="course-pct">55%</div>
+          </div>
+          <div class="course-item">
+            <div class="course-thumb t3">📊</div>
+            <div class="course-info">
+              <div class="course-name">Data Science & Python</div>
+              <div class="course-meta">Amara Bah · 28 modules</div>
+              <div class="progress-bar" style="margin-top:.35rem"><div class="progress-fill yellow" style="width:32%"></div></div>
+            </div>
+            <div class="course-pct">32%</div>
+          </div>
+          <div class="course-item">
+            <div class="course-thumb t4">📱</div>
+            <div class="course-info">
+              <div class="course-name">Marketing Digital</div>
+              <div class="course-meta">Sophie Lema · 18 modules</div>
+              <div class="progress-bar" style="margin-top:.35rem"><div class="progress-fill green" style="width:100%"></div></div>
+            </div>
+            <div class="course-pct" style="color:var(--success)">100%</div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header">
+            <div class="card-title">📅 Planning</div>
+            <button class="btn btn-ghost btn-xs" onclick="showPage('live')">Agenda →</button>
+          </div>
+          <div class="schedule-item"><div class="schedule-time"><div class="s-time">09h00</div><div class="s-day">Lun</div></div><div class="s-dot p"></div><div class="s-info"><div class="sn">Design UI/UX – Module 18</div><div class="ss">Marie Dubois · 1h30</div></div><span class="tag tag-danger" style="margin-left:auto;white-space:nowrap">🔴 Live</span></div>
+          <div class="schedule-item"><div class="schedule-time"><div class="s-time">14h00</div><div class="s-day">Mar</div></div><div class="s-dot a"></div><div class="s-info"><div class="sn">Full Stack – Node.js</div><div class="ss">Jean Konan · 2h</div></div><span class="tag tag-warning" style="margin-left:auto;white-space:nowrap">Demain</span></div>
+          <div class="schedule-item"><div class="schedule-time"><div class="s-time">10h00</div><div class="s-day">Mer</div></div><div class="s-dot s"></div><div class="s-info"><div class="sn">Python – Quiz</div><div class="ss">Amara Bah · 45min</div></div><span class="tag tag-success" style="margin-left:auto;white-space:nowrap">Planifié</span></div>
+          <div class="schedule-item"><div class="schedule-time"><div class="s-time">16h00</div><div class="s-day">Ven</div></div><div class="s-dot w"></div><div class="s-info"><div class="sn">Marketing – Examen</div><div class="ss">Sophie Lema · 1h</div></div><span class="tag tag-primary" style="margin-left:auto;white-space:nowrap">Exam</span></div>
+        </div>
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="home-3col">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📈 Activité hebdo</div><span style="font-size:.72rem;color:var(--muted)">Cette semaine</span></div>
+          <div class="chart-bars"><div class="bar" style="height:40%"></div><div class="bar" style="height:70%"></div><div class="bar" style="height:55%"></div><div class="bar active" style="height:90%"></div><div class="bar" style="height:65%"></div><div class="bar" style="height:30%"></div><div class="bar" style="height:50%"></div></div>
+          <div class="bar-labels"><span class="bar-lbl">Lun</span><span class="bar-lbl">Mar</span><span class="bar-lbl">Mer</span><span class="bar-lbl">Jeu</span><span class="bar-lbl">Ven</span><span class="bar-lbl">Sam</span><span class="bar-lbl">Dim</span></div>
+          <div class="divider"></div>
+          <div class="flex gap-md"><div><div style="font-size:1rem;font-weight:800;font-family:var(--mono)">12h</div><div class="text-sm text-muted">Étudié</div></div><div><div style="font-size:1rem;font-weight:800;font-family:var(--mono)">5</div><div class="text-sm text-muted">Leçons</div></div><div><div style="font-size:1rem;font-weight:800;font-family:var(--mono)">🔥7</div><div class="text-sm text-muted">Série</div></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🏆 Achievements</div><button class="btn btn-ghost btn-xs" onclick="showPage('progress')">Tous →</button></div>
+          <div class="ach-item"><div class="ach-icon ai-g">🥇</div><div><div style="font-size:.8rem;font-weight:600">Premier certificat</div><div class="text-sm text-muted">Il y a 2 jours</div></div><div class="ach-pts">+100 pts</div></div>
+          <div class="ach-item"><div class="ach-icon ai-b">🔥</div><div><div style="font-size:.8rem;font-weight:600">Série 7 jours</div><div class="text-sm text-muted">Il y a 5 jours</div></div><div class="ach-pts">+50 pts</div></div>
+          <div class="ach-item"><div class="ach-icon ai-p">⚡</div><div><div style="font-size:.8rem;font-weight:600">Quiz parfait</div><div class="text-sm text-muted">Il y a 1 semaine</div></div><div class="ach-pts">+75 pts</div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">💡 Recommandés</div><button class="btn btn-ghost btn-xs" onclick="showPage('catalogue')">Explorer →</button></div>
+          <div class="rec-item"><div class="rec-thumb t1">🤖</div><div><div style="font-size:.8rem;font-weight:600">Intelligence Artificielle</div><div class="text-sm text-muted">42 modules · ⭐ 4.9</div></div><span class="rec-action" onclick="showPage('catalogue')">Voir</span></div>
+          <div class="rec-item"><div class="rec-thumb t2">☁️</div><div><div style="font-size:.8rem;font-weight:600">Cloud Computing AWS</div><div class="text-sm text-muted">30 modules · ⭐ 4.7</div></div><span class="rec-action" onclick="showPage('catalogue')">Voir</span></div>
+          <div class="rec-item"><div class="rec-thumb t3">📦</div><div><div style="font-size:.8rem;font-weight:600">Gestion Agile</div><div class="text-sm text-muted">20 modules · ⭐ 4.8</div></div><span class="rec-action" onclick="showPage('catalogue')">Voir</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 2 – MES COURS                                               -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-courses">
+      <div class="section-header mb-md">
+        <div><div class="section-title">Mes Cours</div><div class="section-sub">4 cours · 1 terminé · 3 en cours</div></div>
+        <button class="btn btn-primary btn-sm" onclick="showPage('catalogue')">+ Découvrir</button>
+      </div>
+      <div class="filter-bar mb-md">
+        <div class="ftab active">Tous (4)</div>
+        <div class="ftab">En cours (3)</div>
+        <div class="ftab">Terminés (1)</div>
+        <div style="margin-left:auto;display:flex;gap:.4rem;flex-shrink:0">
+          <select class="sel"><option>Récent</option><option>Progression</option></select>
+        </div>
+      </div>
+      <div class="g-auto">
+        <div class="course-card">
+          <div class="cc-thumb t1">🎨<div class="cc-level"><span class="tag tag-primary">Avancé</span></div></div>
+          <div class="cc-body">
+            <div class="cc-title">Design UI/UX Avancé</div>
+            <div class="cc-teacher"><div class="av av-sm">MD</div>Marie Dubois</div>
+            <div class="cc-meta"><span>📁 24 modules</span><span>⏱️ 36h</span><span>⭐ 4.8</span></div>
+            <div><div class="cc-prog-top"><span class="cc-prog-label">Progression</span><span class="cc-prog-val">75%</span></div><div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div></div>
+            <div class="cc-last">Module 18/24 · il y a 2h</div>
+          </div>
+          <div class="cc-footer"><button class="btn btn-primary btn-sm" style="flex:1">▶ Continuer</button><button class="btn btn-ghost btn-sm">📋</button></div>
+        </div>
+        <div class="course-card">
+          <div class="cc-thumb t2">💻<div class="cc-level"><span class="tag tag-warning">Intermédiaire</span></div></div>
+          <div class="cc-body">
+            <div class="cc-title">Full Stack Web Dev</div>
+            <div class="cc-teacher"><div class="av av-sm" style="background:linear-gradient(135deg,var(--success),#34d399)">JK</div>Jean Konan</div>
+            <div class="cc-meta"><span>📁 36 modules</span><span>⏱️ 60h</span><span>⭐ 4.6</span></div>
+            <div><div class="cc-prog-top"><span class="cc-prog-label">Progression</span><span class="cc-prog-val">55%</span></div><div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div></div>
+            <div class="cc-last">Module 20/36 · il y a 1 jour</div>
+          </div>
+          <div class="cc-footer"><button class="btn btn-primary btn-sm" style="flex:1">▶ Continuer</button><button class="btn btn-ghost btn-sm">📋</button></div>
+        </div>
+        <div class="course-card">
+          <div class="cc-thumb t3">📊<div class="cc-level"><span class="tag tag-success">Débutant</span></div></div>
+          <div class="cc-body">
+            <div class="cc-title">Data Science & Python</div>
+            <div class="cc-teacher"><div class="av av-sm" style="background:linear-gradient(135deg,var(--warning),#fcd34d)">AB</div>Amara Bah</div>
+            <div class="cc-meta"><span>📁 28 modules</span><span>⏱️ 40h</span><span>⭐ 4.7</span></div>
+            <div><div class="cc-prog-top"><span class="cc-prog-label">Progression</span><span class="cc-prog-val">32%</span></div><div class="progress-bar"><div class="progress-fill yellow" style="width:32%"></div></div></div>
+            <div class="cc-last">Module 9/28 · il y a 3 jours</div>
+          </div>
+          <div class="cc-footer"><button class="btn btn-primary btn-sm" style="flex:1">▶ Continuer</button><button class="btn btn-ghost btn-sm">📋</button></div>
+        </div>
+        <div class="course-card">
+          <div class="cc-thumb t4" style="position:relative">📱<div style="position:absolute;inset:0;background:rgba(16,185,129,.1);display:flex;align-items:center;justify-content:center;font-size:2.2rem">✅</div><div class="cc-level"><span class="tag tag-success">Terminé</span></div></div>
+          <div class="cc-body">
+            <div class="cc-title">Marketing Digital</div>
+            <div class="cc-teacher"><div class="av av-sm" style="background:linear-gradient(135deg,#fce7f3,#f9a8d4);color:#be185d">SL</div>Sophie Lema</div>
+            <div class="cc-meta"><span>📁 18 modules</span><span>⏱️ 24h</span><span>⭐ 4.9</span></div>
+            <div><div class="cc-prog-top"><span class="cc-prog-label">Progression</span><span class="cc-prog-val" style="color:var(--success)">100% ✅</span></div><div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div></div>
+            <div class="cc-last">Terminé le 10 avril 2025</div>
+          </div>
+          <div class="cc-footer"><button class="btn btn-success btn-sm" style="flex:1" onclick="showPage('certificates')">🏆 Certificat</button><button class="btn btn-ghost btn-sm">🔄</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 3 – CATALOGUE                                               -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-catalogue">
+      <div class="section-header mb-md"><div><div class="section-title">Catalogue</div><div class="section-sub">Découvrez nos cours</div></div></div>
+      <div class="cat-search mb-sm"><span style="color:var(--muted)">🔍</span><input type="text" placeholder="Rechercher un cours, formateur..."/></div>
+      <div class="cat-filters mb-md">
+        <div class="chip active">Tous</div><div class="chip">Design</div><div class="chip">Dev</div><div class="chip">Data</div><div class="chip">Marketing</div><div class="chip">IA</div><div class="chip">Cloud</div><div class="chip">Mobile</div><div class="chip">Business</div>
+      </div>
+      <div style="display:flex;gap:.5rem;margin-bottom:1rem;flex-wrap:wrap">
+        <select class="sel"><option>Tous les niveaux</option><option>Débutant</option><option>Intermédiaire</option><option>Avancé</option></select>
+        <select class="sel"><option>Populaire</option><option>Note</option><option>Prix ↑</option><option>Prix ↓</option><option>Récent</option></select>
+      </div>
+      <div class="cat-grid">
+        <div class="cat-card"><div class="cat-thumb t1">🤖<span class="price-badge">35 000 FCFA</span></div><div class="cat-body"><span class="tag tag-primary mb-sm">IA & ML</span><div class="cat-title">Intelligence Artificielle & Deep Learning</div><div class="cat-teacher">par Amadou Diallo</div><div class="cat-rating"><span class="star">⭐</span><strong>4.9</strong><span class="text-muted">(248)</span></div><div class="cat-footer"><span class="tag tag-warning">Avancé</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+        <div class="cat-card"><div class="cat-thumb t2">☁️<span class="price-badge">28 000 FCFA</span></div><div class="cat-body"><span class="tag tag-cyan mb-sm">Cloud</span><div class="cat-title">Cloud Computing AWS</div><div class="cat-teacher">par Ibrahim Touré</div><div class="cat-rating"><span class="star">⭐</span><strong>4.7</strong><span class="text-muted">(183)</span></div><div class="cat-footer"><span class="tag tag-warning">Intermédiaire</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+        <div class="cat-card"><div class="cat-thumb t3">📦<span class="price-badge free">Gratuit</span></div><div class="cat-body"><span class="tag tag-success mb-sm">Business</span><div class="cat-title">Gestion de Projet Agile</div><div class="cat-teacher">par Nadia Kamara</div><div class="cat-rating"><span class="star">⭐</span><strong>4.8</strong><span class="text-muted">(412)</span></div><div class="cat-footer"><span class="tag tag-success">Débutant</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+        <div class="cat-card"><div class="cat-thumb t4">📱<span class="price-badge">22 000 FCFA</span></div><div class="cat-body"><span class="tag tag-warning mb-sm">Mobile</span><div class="cat-title">Développement Mobile React Native</div><div class="cat-teacher">par Kevin Mensah</div><div class="cat-rating"><span class="star">⭐</span><strong>4.6</strong><span class="text-muted">(97)</span></div><div class="cat-footer"><span class="tag tag-warning">Intermédiaire</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+        <div class="cat-card"><div class="cat-thumb t5">🎬<span class="price-badge">18 000 FCFA</span></div><div class="cat-body"><span class="tag tag-primary mb-sm">Design</span><div class="cat-title">Motion Design & After Effects</div><div class="cat-teacher">par Clara Sow</div><div class="cat-rating"><span class="star">⭐</span><strong>4.5</strong><span class="text-muted">(156)</span></div><div class="cat-footer"><span class="tag tag-success">Débutant</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+        <div class="cat-card"><div class="cat-thumb t7">🔐<span class="price-badge">40 000 FCFA</span></div><div class="cat-body"><span class="tag tag-danger mb-sm">Cybersécurité</span><div class="cat-title">Cybersécurité & Ethical Hacking</div><div class="cat-teacher">par Omar Sylla</div><div class="cat-rating"><span class="star">⭐</span><strong>4.9</strong><span class="text-muted">(302)</span></div><div class="cat-footer"><span class="tag tag-warning">Avancé</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+        <div class="cat-card"><div class="cat-thumb t8">📣<span class="price-badge free">Gratuit</span></div><div class="cat-body"><span class="tag tag-warning mb-sm">Marketing</span><div class="cat-title">Community Management</div><div class="cat-teacher">par Fatou Diop</div><div class="cat-rating"><span class="star">⭐</span><strong>4.4</strong><span class="text-muted">(229)</span></div><div class="cat-footer"><span class="tag tag-success">Débutant</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+        <div class="cat-card"><div class="cat-thumb t6">🗄️<span class="price-badge">25 000 FCFA</span></div><div class="cat-body"><span class="tag tag-cyan mb-sm">Data</span><div class="cat-title">SQL & Bases de données</div><div class="cat-teacher">par Romuald Adjei</div><div class="cat-rating"><span class="star">⭐</span><strong>4.6</strong><span class="text-muted">(178)</span></div><div class="cat-footer"><span class="tag tag-warning">Intermédiaire</span><button class="btn btn-primary btn-xs">S'inscrire</button></div></div></div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 4 – SESSIONS LIVE                                           -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-live">
+      <div class="live-hero mb-md">
+        <div class="live-badge">🔴 EN DIRECT</div>
+        <div class="live-title">Design UI/UX – Module 18 : Systèmes de design</div>
+        <div class="live-meta">Marie Dubois · 1h30 · 47 participants actifs</div>
+        <div class="live-actions">
+          <button class="btn-live-join">▶ Rejoindre</button>
+          <button class="btn-live-ghost">🎤 Micro</button>
+          <button class="btn-live-ghost">📋 Ressources</button>
+        </div>
+      </div>
+      <div class="g2 mb-lg" style="align-items:start">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📅 Sessions à venir</div><span class="tag tag-primary">Ce mois</span></div>
+          <div class="live-session"><div class="ls-date"><div class="ls-day">15</div><div class="ls-month">Avr</div></div><div class="ls-info"><div class="ls-title">Full Stack – Node.js Pratique</div><div class="ls-meta"><span>👤 Jean Konan</span><span>⏰ 14h–16h</span><span>👥 32</span></div></div><div class="ls-right"><div class="ls-countdown">Dans 2 jours</div><button class="btn btn-outline btn-xs" style="margin-top:.3rem">Rappel</button></div></div>
+          <div class="live-session"><div class="ls-date"><div class="ls-day">17</div><div class="ls-month">Avr</div></div><div class="ls-info"><div class="ls-title">Python – Quiz & Q&A</div><div class="ls-meta"><span>👤 Amara Bah</span><span>⏰ 10h–10h45</span></div></div><div class="ls-right"><div class="ls-countdown">Dans 4 jours</div><button class="btn btn-outline btn-xs" style="margin-top:.3rem">Rappel</button></div></div>
+          <div class="live-session"><div class="ls-date"><div class="ls-day">18</div><div class="ls-month">Avr</div></div><div class="ls-info"><div class="ls-title">Marketing – Examen final</div><div class="ls-meta"><span>👤 Sophie Lema</span><span>⏰ 16h–17h</span></div></div><div class="ls-right"><div class="ls-countdown">Dans 5 jours</div><button class="btn btn-outline btn-xs" style="margin-top:.3rem">Rappel</button></div></div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">🎬 Replays disponibles</div></div>
+          <div class="live-session" style="opacity:.8"><div class="ls-date" style="background:var(--bg)"><div class="ls-day" style="color:var(--muted)">08</div><div class="ls-month">Avr</div></div><div class="ls-info"><div class="ls-title">Design UI/UX – Module 17</div><div class="ls-meta"><span>👤 Marie Dubois</span><span>⏱️ 1h25</span></div></div><button class="btn btn-ghost btn-xs">▶ Replay</button></div>
+          <div class="live-session" style="opacity:.8"><div class="ls-date" style="background:var(--bg)"><div class="ls-day" style="color:var(--muted)">05</div><div class="ls-month">Avr</div></div><div class="ls-info"><div class="ls-title">Full Stack – Docker</div><div class="ls-meta"><span>👤 Jean Konan</span><span>⏱️ 1h55</span></div></div><button class="btn btn-ghost btn-xs">▶ Replay</button></div>
+          <div class="live-session" style="opacity:.8"><div class="ls-date" style="background:var(--bg)"><div class="ls-day" style="color:var(--muted)">01</div><div class="ls-month">Avr</div></div><div class="ls-info"><div class="ls-title">Python – Pandas</div><div class="ls-meta"><span>👤 Amara Bah</span><span>⏱️ 44min</span></div></div><button class="btn btn-ghost btn-xs">▶ Replay</button></div>
+          <div class="live-session" style="opacity:.8"><div class="ls-date" style="background:var(--bg)"><div class="ls-day" style="color:var(--muted)">28</div><div class="ls-month">Mar</div></div><div class="ls-info"><div class="ls-title">Marketing – Stratégie SEO</div><div class="ls-meta"><span>👤 Sophie Lema</span><span>⏱️ 58min</span></div></div><button class="btn btn-ghost btn-xs">▶ Replay</button></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 5 – CERTIFICATS                                             -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-certificates">
+      <div class="section-header mb-md"><div><div class="section-title">Mes Certificats</div><div class="section-sub">2 obtenus</div></div><span class="tag tag-success" style="font-size:.78rem;padding:.35rem .8rem">🏆 225 pts cumulés</span></div>
+      <div class="cert-preview mb-md">
+        <div class="cert-logo">🎓</div>
+        <div class="cert-sub-text">ICONNECT – Certificat de réussite</div>
+        <div style="opacity:.7;font-size:.75rem">Ce certificat est décerné à</div>
+        <div class="cert-student">Kofi Asante</div>
+        <div style="font-size:.8rem;opacity:.85">pour avoir complété avec succès</div>
+        <div class="cert-course-name">📱 Marketing Digital</div>
+        <div style="font-size:.75rem;opacity:.78;margin-bottom:.5rem">Délivré le 10 avril 2025 · Score : 92/100</div>
+        <div class="cert-id-display">ID: ICON-MKT-2025-KA-0142</div>
+        <div class="cert-actions">
+          <button class="btn-live-join" style="font-size:.78rem">⬇ Télécharger</button>
+          <button class="btn-live-ghost" style="font-size:.78rem">🔗 Partager</button>
+          <button class="btn-live-ghost" style="font-size:.78rem">in LinkedIn</button>
+        </div>
+      </div>
+      <div class="certificate-card">
+        <div class="cert-icon">📱</div>
+        <div class="cert-info">
+          <div class="cert-title">Marketing Digital</div>
+          <div class="cert-course">Sophie Lema · 18 modules</div>
+          <div class="cert-meta"><span>📅 10 avr. 2025</span><span>🎯 92/100</span></div>
+          <div class="cert-id">ICON-MKT-2025-KA-0142</div>
+        </div>
+        <div class="cert-cta"><button class="btn btn-primary btn-xs">⬇ PDF</button><button class="btn btn-ghost btn-xs">🔗 Share</button></div>
+      </div>
+      <div class="certificate-card">
+        <div class="cert-icon" style="background:linear-gradient(135deg,var(--success-l),var(--accent-l))">📊</div>
+        <div class="cert-info">
+          <div class="cert-title">Introduction à la Data Science</div>
+          <div class="cert-course">Amara Bah · 12 modules</div>
+          <div class="cert-meta"><span>📅 15 mars 2025</span><span>🎯 88/100</span></div>
+          <div class="cert-id">ICON-DS-2025-KA-0089</div>
+        </div>
+        <div class="cert-cta"><button class="btn btn-primary btn-xs">⬇ PDF</button><button class="btn btn-ghost btn-xs">🔗 Share</button></div>
+      </div>
+      <div class="section-title mb-md mt-lg">🔒 À débloquer</div>
+      <div class="g3">
+        <div class="card" style="opacity:.6;text-align:center">
+          <div style="font-size:2.2rem;filter:grayscale(1);margin-bottom:.4rem">🎨</div>
+          <div class="fw-700 mb-sm" style="font-size:.85rem">Design UI/UX Avancé</div>
+          <div class="text-sm text-muted mb-sm">75% complété</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div>
+          <div class="text-sm text-muted" style="margin-top:.4rem">Encore 6 modules</div>
+        </div>
+        <div class="card" style="opacity:.6;text-align:center">
+          <div style="font-size:2.2rem;filter:grayscale(1);margin-bottom:.4rem">💻</div>
+          <div class="fw-700 mb-sm" style="font-size:.85rem">Full Stack Web Dev</div>
+          <div class="text-sm text-muted mb-sm">55% complété</div>
+          <div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div>
+          <div class="text-sm text-muted" style="margin-top:.4rem">Encore 16 modules</div>
+        </div>
+        <div class="card" style="opacity:.6;text-align:center">
+          <div style="font-size:2.2rem;filter:grayscale(1);margin-bottom:.4rem">📊</div>
+          <div class="fw-700 mb-sm" style="font-size:.85rem">Data Science</div>
+          <div class="text-sm text-muted mb-sm">32% complété</div>
+          <div class="progress-bar"><div class="progress-fill yellow" style="width:32%"></div></div>
+          <div class="text-sm text-muted" style="margin-top:.4rem">Encore 19 modules</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 6 – MES PROGRÈS                                             -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-progress">
+      <div class="section-header mb-md"><div class="section-title">📈 Mes Progrès</div></div>
+      <div class="stats-row mb-md">
+        <div class="mini-stat"><div class="mini-val">42h</div><div class="mini-lbl">Temps étudié</div></div>
+        <div class="mini-stat"><div class="mini-val">57</div><div class="mini-lbl">Leçons finies</div></div>
+        <div class="mini-stat"><div class="mini-val">🔥7</div><div class="mini-lbl">Jours de série</div></div>
+        <div class="mini-stat"><div class="mini-val">225</div><div class="mini-lbl">Points XP</div></div>
+      </div>
+      <div class="g2 mb-md">
+        <div class="card">
+          <div class="card-header"><div class="card-title">📚 Par cours</div></div>
+          <div style="display:flex;flex-direction:column;gap:1rem">
+            <div><div class="flex gap-sm" style="justify-content:space-between;margin-bottom:.3rem"><span class="fw-600 text-sm">🎨 Design UI/UX</span><span class="fw-700 text-sm" style="color:var(--primary)">75% · 18/24</span></div><div class="progress-bar"><div class="progress-fill" style="width:75%"></div></div><div class="text-sm text-muted" style="margin-top:.25rem">Dernière activité : il y a 2h</div></div>
+            <div><div class="flex gap-sm" style="justify-content:space-between;margin-bottom:.3rem"><span class="fw-600 text-sm">💻 Full Stack</span><span class="fw-700 text-sm" style="color:var(--primary)">55% · 20/36</span></div><div class="progress-bar"><div class="progress-fill" style="width:55%"></div></div><div class="text-sm text-muted" style="margin-top:.25rem">Dernière activité : il y a 1j</div></div>
+            <div><div class="flex gap-sm" style="justify-content:space-between;margin-bottom:.3rem"><span class="fw-600 text-sm">📊 Data Science</span><span class="fw-700 text-sm" style="color:var(--warning)">32% · 9/28</span></div><div class="progress-bar"><div class="progress-fill yellow" style="width:32%"></div></div><div class="text-sm text-muted" style="margin-top:.25rem">Dernière activité : il y a 3j</div></div>
+            <div><div class="flex gap-sm" style="justify-content:space-between;margin-bottom:.3rem"><span class="fw-600 text-sm">📱 Marketing</span><span class="fw-700 text-sm" style="color:var(--success)">100% ✅</span></div><div class="progress-bar"><div class="progress-fill green" style="width:100%"></div></div><div class="text-sm text-muted" style="margin-top:.25rem">Terminé le 10 avr. 2025</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><div class="card-title">📊 Activité mensuelle</div><span class="text-sm text-muted">Avril 2025</span></div>
+          <div class="chart-bars" style="height:90px"><div class="bar" style="height:30%"></div><div class="bar" style="height:60%"></div><div class="bar" style="height:40%"></div><div class="bar" style="height:80%"></div><div class="bar active" style="height:95%"></div><div class="bar" style="height:50%"></div><div class="bar" style="height:70%"></div></div>
+          <div class="bar-labels"><span class="bar-lbl">S1</span><span class="bar-lbl">S2</span><span class="bar-lbl">S3</span><span class="bar-lbl">S4</span><span class="bar-lbl">S5</span><span class="bar-lbl">S6</span><span class="bar-lbl">S7</span></div>
+          <div class="divider"></div>
+          <div style="display:flex;flex-direction:column;gap:.5rem">
+            <div class="flex gap-sm"><span style="width:90px;font-size:.75rem;color:var(--muted)">Meilleur jour</span><strong class="text-sm">Jeudi · 3h45</strong></div>
+            <div class="flex gap-sm"><span style="width:90px;font-size:.75rem;color:var(--muted)">Objectif</span><div style="flex:1"><div class="progress-bar"><div class="progress-fill" style="width:80%"></div></div></div><strong class="text-sm">12/15h</strong></div>
+            <div class="flex gap-sm"><span style="width:90px;font-size:.75rem;color:var(--muted)">Série</span><strong class="text-sm">🔥 7 jours</strong></div>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">🏅 Tous mes Achievements</div><span class="tag tag-primary">4 obtenus · 8 à débloquer</span></div>
+        <div class="ach-grid">
+          <div class="ach-cell"><div class="ach-cell-icon">🥇</div><div class="ach-cell-name">Premier certificat</div><div class="ach-cell-sub">+100 pts · Débloqué</div></div>
+          <div class="ach-cell"><div class="ach-cell-icon">🔥</div><div class="ach-cell-name">Série 7 jours</div><div class="ach-cell-sub">+50 pts · Débloqué</div></div>
+          <div class="ach-cell"><div class="ach-cell-icon">⚡</div><div class="ach-cell-name">Quiz parfait</div><div class="ach-cell-sub">+75 pts · Débloqué</div></div>
+          <div class="ach-cell"><div class="ach-cell-icon">🎯</div><div class="ach-cell-name">Objectif hebdo</div><div class="ach-cell-sub">+30 pts · Débloqué</div></div>
+          <div class="ach-cell locked"><div class="ach-cell-icon" style="filter:grayscale(1)">💯</div><div class="ach-cell-name">Score parfait</div><div class="ach-cell-sub">100% à un quiz</div></div>
+          <div class="ach-cell locked"><div class="ach-cell-icon" style="filter:grayscale(1)">🚀</div><div class="ach-cell-name">Lanceur</div><div class="ach-cell-sub">Finir 3 cours</div></div>
+          <div class="ach-cell locked"><div class="ach-cell-icon" style="filter:grayscale(1)">👑</div><div class="ach-cell-name">Roi apprenant</div><div class="ach-cell-sub">30 jours d'affilée</div></div>
+          <div class="ach-cell locked"><div class="ach-cell-icon" style="filter:grayscale(1)">🌟</div><div class="ach-cell-name">Superstar</div><div class="ach-cell-sub">500 points XP</div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 7 – MESSAGES                                                -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-messages">
+      <div class="section-header mb-md"><div class="section-title">💬 Messages</div><button class="btn btn-primary btn-sm">+ Nouveau</button></div>
+      <div class="messages-layout">
+        <div class="conv-panel" id="conv-panel">
+          <div class="conv-search"><div class="cs-box"><span>🔍</span><input type="text" placeholder="Rechercher..."/></div></div>
+          <div class="conv-list">
+            <div class="conv-item active" onclick="openChat()"><div class="conv-av" style="background:linear-gradient(135deg,var(--primary),var(--accent))">MD</div><div class="conv-info"><div class="conv-name">Marie Dubois</div><div class="conv-preview">Bonjour Kofi, n'oubliez pas...</div></div><div class="conv-time">10:34</div><div class="conv-unread">2</div></div>
+            <div class="conv-item" onclick="openChat()"><div class="conv-av" style="background:linear-gradient(135deg,var(--success),#34d399)">JK</div><div class="conv-info"><div class="conv-name">Jean Konan</div><div class="conv-preview">Votre exercice Docker était excellent !</div></div><div class="conv-time">Hier</div></div>
+            <div class="conv-item" onclick="openChat()"><div class="conv-av" style="background:linear-gradient(135deg,var(--warning),#fcd34d)">AB</div><div class="conv-info"><div class="conv-name">Amara Bah</div><div class="conv-preview">Avez-vous vu la vidéo Pandas ?</div></div><div class="conv-time">Lun</div><div class="conv-unread">1</div></div>
+            <div class="conv-item" onclick="openChat()"><div class="conv-av" style="background:linear-gradient(135deg,#fce7f3,#f9a8d4);color:#be185d">SL</div><div class="conv-info"><div class="conv-name">Sophie Lema</div><div class="conv-preview">Félicitations pour votre certificat 🎉</div></div><div class="conv-time">Dim</div></div>
+            <div class="conv-item" onclick="openChat()"><div class="conv-av" style="background:var(--primary-l);color:var(--primary)">📢</div><div class="conv-info"><div class="conv-name">Support ICONNECT</div><div class="conv-preview">Votre compte a été activé</div></div><div class="conv-time">Il y a 5j</div></div>
+          </div>
+        </div>
+        <div class="chat-panel">
+          <div class="chat-header">
+            <div class="conv-av" style="background:linear-gradient(135deg,var(--primary),var(--accent));width:36px;height:36px;font-size:.78rem">MD</div>
+            <div><div class="fw-700" style="font-size:.88rem">Marie Dubois</div><div class="flex gap-xs"><div class="chat-online"></div><span class="text-sm text-muted">En ligne</span></div></div>
+            <div class="ml-auto flex gap-xs"><div class="icon-btn">📞</div><div class="icon-btn">📹</div></div>
+          </div>
+          <div class="chat-body">
+            <div class="msg-row"><div class="av av-sm">MD</div><div><div class="msg-bubble received">Bonjour Kofi ! Rappel : session live ce matin à 9h00 !</div><div class="msg-time">10:15</div></div></div>
+            <div class="msg-row"><div class="av av-sm">MD</div><div><div class="msg-bubble received">Préparez vos questions sur les systèmes de design.</div><div class="msg-time">10:16</div></div></div>
+            <div class="msg-row sent"><div class="av av-sm" style="background:linear-gradient(135deg,var(--accent),#0891b2)">KA</div><div><div class="msg-bubble sent">Bonjour ! Merci. Je serai là. J'ai des questions sur les tokens de typographie.</div><div class="msg-time sent">10:22</div></div></div>
+            <div class="msg-row"><div class="av av-sm">MD</div><div><div class="msg-bubble received">Parfait ! On couvre ça aujourd'hui 😊 À tout à l'heure !</div><div class="msg-time">10:34</div></div></div>
+          </div>
+          <div class="chat-input-area">
+            <div class="icon-btn">📎</div>
+            <input class="chat-input" type="text" placeholder="Écrire un message..."/>
+            <div class="icon-btn">😊</div>
+            <button class="chat-send">➤</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 8 – PAIEMENTS                                               -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-payments">
+      <div class="section-header mb-md"><div class="section-title">💳 Paiements</div><button class="btn btn-ghost btn-sm">⬇ Export CSV</button></div>
+      <div class="pay-summary mb-md">
+        <div class="pay-card"><div class="pay-icon" style="background:var(--primary-l)">💰</div><div class="pay-amount">95 000 FCFA</div><div class="pay-label">Total dépensé</div></div>
+        <div class="pay-card"><div class="pay-icon" style="background:var(--success-l)">✅</div><div class="pay-amount">3</div><div class="pay-label">Paiements réussis</div></div>
+        <div class="pay-card"><div class="pay-icon" style="background:var(--warning-l)">🎁</div><div class="pay-amount">2</div><div class="pay-label">Cours gratuits</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header"><div class="card-title">📋 Historique</div><select class="sel"><option>Ce mois</option><option>3 mois</option><option>Cette année</option></select></div>
+        <div class="pay-table-wrap">
+          <table class="pay-table">
+            <thead><tr><th>Date</th><th>Cours</th><th>Montant</th><th>Méthode</th><th>Statut</th><th>Facture</th></tr></thead>
+            <tbody>
+              <tr><td style="font-family:var(--mono);font-size:.75rem">10 avr. 2025</td><td>📱 Marketing Digital</td><td style="font-family:var(--mono);font-weight:700">18 000 FCFA</td><td>📱 Mobile Money</td><td><span class="pay-status ps-ok">✅ Réussi</span></td><td><button class="btn btn-ghost btn-xs">PDF</button></td></tr>
+              <tr><td style="font-family:var(--mono);font-size:.75rem">28 mars 2025</td><td>💻 Full Stack</td><td style="font-family:var(--mono);font-weight:700">45 000 FCFA</td><td>💳 Carte</td><td><span class="pay-status ps-ok">✅ Réussi</span></td><td><button class="btn btn-ghost btn-xs">PDF</button></td></tr>
+              <tr><td style="font-family:var(--mono);font-size:.75rem">15 mars 2025</td><td>🎨 Design UI/UX</td><td style="font-family:var(--mono);font-weight:700">32 000 FCFA</td><td>📱 Mobile Money</td><td><span class="pay-status ps-ok">✅ Réussi</span></td><td><button class="btn btn-ghost btn-xs">PDF</button></td></tr>
+              <tr><td style="font-family:var(--mono);font-size:.75rem">10 mars 2025</td><td>📊 Data Science</td><td style="font-family:var(--mono);font-weight:700">0 FCFA</td><td>🎁 Gratuit</td><td><span class="pay-status ps-ok">✅ Réussi</span></td><td><span class="text-muted">—</span></td></tr>
+              <tr><td style="font-family:var(--mono);font-size:.75rem">08 mars 2025</td><td>📦 Gestion Agile</td><td style="font-family:var(--mono);font-weight:700">0 FCFA</td><td>🎁 Gratuit</td><td><span class="pay-status ps-ok">✅ Réussi</span></td><td><span class="text-muted">—</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 9 – PROFIL                                                  -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-profile">
+      <div class="profile-header mb-md">
+        <div class="ph-avatar">KA</div>
+        <div class="ph-info">
+          <h2>Kofi Asante</h2>
+          <div class="ph-email">📧 kofi.asante@email.com</div>
+          <div class="ph-joined">📅 Membre depuis janvier 2025</div>
+          <div class="ph-badges"><span class="ph-badge">🎓 Étudiant</span><span class="ph-badge">🏆 2 certifs</span><span class="ph-badge">⭐ 225 XP</span><span class="ph-badge">🔥 7j streak</span></div>
+        </div>
+        <div class="ph-cta"><button class="btn-live-join" style="font-size:.75rem">📷 Photo</button><button class="btn-live-ghost" style="font-size:.75rem">🔗 Profil public</button></div>
+      </div>
+      <div class="stats-row mb-md">
+        <div class="mini-stat"><div class="mini-val">4</div><div class="mini-lbl">Cours inscrits</div></div>
+        <div class="mini-stat"><div class="mini-val">2</div><div class="mini-lbl">Certificats</div></div>
+        <div class="mini-stat"><div class="mini-val">42h</div><div class="mini-lbl">Temps étudié</div></div>
+        <div class="mini-stat"><div class="mini-val">225</div><div class="mini-lbl">Points XP</div></div>
+      </div>
+      <div class="g2 mb-md">
+        <div class="card">
+          <div class="card-header"><div class="card-title">👤 Informations personnelles</div></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Prénom</label><input class="form-input" type="text" value="Kofi"/></div>
+            <div class="form-group"><label class="form-label">Nom</label><input class="form-input" type="text" value="Asante"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Email</label><input class="form-input" type="email" value="kofi.asante@email.com"/></div>
+            <div class="form-group"><label class="form-label">Téléphone</label><input class="form-input" type="tel" value="+225 07 00 000 000"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Pays</label><select class="form-input form-select"><option>Côte d'Ivoire</option><option>Sénégal</option><option>Mali</option></select></div>
+            <div class="form-group"><label class="form-label">Ville</label><input class="form-input" type="text" value="Abidjan"/></div>
+          </div>
+          <div class="form-group full mb-md"><label class="form-label">Bio</label><textarea class="form-input form-textarea">Passionné par le design et le dev web. En formation continue sur ICONNECT.</textarea></div>
+          <button class="btn btn-primary btn-sm">💾 Enregistrer</button>
+        </div>
+        <div>
+          <div class="card mb-md">
+            <div class="card-header"><div class="card-title">🎯 Compétences</div></div>
+            <div class="skills-area mb-sm"><span class="skill-tag">UI/UX<span class="rm">×</span></span><span class="skill-tag">HTML/CSS<span class="rm">×</span></span><span class="skill-tag">JavaScript<span class="rm">×</span></span><span class="skill-tag">Figma<span class="rm">×</span></span><span class="skill-tag">Python<span class="rm">×</span></span><span class="skill-tag">Marketing<span class="rm">×</span></span></div>
+            <div class="form-hint">Appuyez Entrée pour ajouter</div>
+          </div>
+          <div class="card mb-md">
+            <div class="card-header"><div class="card-title">🎓 Objectifs</div></div>
+            <div style="display:flex;flex-direction:column;gap:.45rem">
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;cursor:pointer"><input type="checkbox" checked/> Devenir dev Full Stack</label>
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;cursor:pointer"><input type="checkbox" checked/> Certification UI/UX</label>
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;cursor:pointer"><input type="checkbox"/> Maîtriser Data Science</label>
+              <label style="display:flex;align-items:center;gap:.5rem;font-size:.8rem;cursor:pointer"><input type="checkbox"/> Lancer un projet freelance</label>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-header"><div class="card-title">🔐 Mot de passe</div></div>
+            <div class="form-group mb-sm"><label class="form-label">Actuel</label><input class="form-input" type="password" placeholder="••••••••"/></div>
+            <div class="form-group mb-sm"><label class="form-label">Nouveau</label><input class="form-input" type="password" placeholder="••••••••"/></div>
+            <div class="form-group mb-md"><label class="form-label">Confirmer</label><input class="form-input" type="password" placeholder="••••••••"/></div>
+            <button class="btn btn-outline btn-sm">🔐 Changer</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================================================================ -->
+    <!-- PAGE 10 – PARAMÈTRES                                             -->
+    <!-- ================================================================ -->
+    <div class="page" id="page-settings">
+      <div class="section-header mb-md"><div class="section-title">⚙️ Paramètres</div></div>
+      <div class="settings-layout">
+        <div class="settings-nav">
+          <div class="sn-item active">🔔 Notifications</div>
+          <div class="sn-item">🌍 Langue</div>
+          <div class="sn-item">🎨 Apparence</div>
+          <div class="sn-item">🔐 Confidentialité</div>
+          <div class="sn-item">📱 Appareils</div>
+          <div class="sn-item">🆘 Aide</div>
+        </div>
+        <div>
+          <div class="card mb-md">
+            <div class="card-header"><div class="card-title">🔔 Notifications</div></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Sessions Live</div><div class="ts">Rappels 30min avant chaque session</div></div><button class="toggle on"></button></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Nouveaux messages</div><div class="ts">Messages des formateurs</div></div><button class="toggle on"></button></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Progression de cours</div><div class="ts">Rappels pour continuer</div></div><button class="toggle on"></button></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Cours recommandés</div><div class="ts">Suggestions personnalisées</div></div><button class="toggle"></button></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Emails marketing</div><div class="ts">Promotions et newsletters</div></div><button class="toggle"></button></div>
+            <div class="toggle-row"><div class="toggle-info"><div class="tl">Certificats & Badges</div><div class="ts">Notification à l'obtention</div></div><button class="toggle on"></button></div>
+          </div>
+          <div class="card mb-md">
+            <div class="card-header"><div class="card-title">🌍 Langue & Région</div></div>
+            <div class="form-row">
+              <div class="form-group"><label class="form-label">Langue</label><select class="form-input form-select"><option selected>🇫🇷 Français</option><option>🇬🇧 English</option><option>🇵🇹 Português</option></select></div>
+              <div class="form-group"><label class="form-label">Fuseau horaire</label><select class="form-input form-select"><option>UTC+0</option><option selected>UTC+1 – Abidjan</option><option>UTC+3 – Nairobi</option></select></div>
+            </div>
+            <button class="btn btn-primary btn-sm">💾 Sauvegarder</button>
+          </div>
+          <div class="card mb-md">
+            <div class="card-header"><div class="card-title">🎨 Apparence</div></div>
+            <div class="form-group">
+              <label class="form-label">Thème</label>
+              <div class="flex gap-md" style="margin-top:.4rem;flex-wrap:wrap">
+                <label style="display:flex;align-items:center;gap:.45rem;cursor:pointer;font-size:.8rem"><input type="radio" name="theme" checked/> ☀️ Clair</label>
+                <label style="display:flex;align-items:center;gap:.45rem;cursor:pointer;font-size:.8rem"><input type="radio" name="theme"/> 🌙 Sombre</label>
+                <label style="display:flex;align-items:center;gap:.45rem;cursor:pointer;font-size:.8rem"><input type="radio" name="theme"/> 💻 Système</label>
+              </div>
+            </div>
+          </div>
+          <div class="danger-zone">
+            <div class="danger-title">⚠️ Zone dangereuse</div>
+            <div class="danger-sub">Ces actions sont irréversibles. Procédez avec prudence.</div>
+            <div class="flex gap-sm gap-wrap">
+              <button class="btn btn-ghost btn-sm">📤 Exporter mes données</button>
+              <button class="btn btn-danger btn-sm">🗑️ Supprimer mon compte</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app-shell -->
+
+<!-- ========== BOTTOM NAV (mobile) ========== -->
+<nav class="bottom-nav" id="bottom-nav">
+  <div class="bottom-nav-item active" onclick="showPage('home')">
+    <div class="bn-indicator"></div>
+    <div class="bn-icon">🏠</div>
+    <div class="bn-label">Accueil</div>
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('courses')">
+    <div class="bn-indicator"></div>
+    <div class="bn-icon">📚</div>
+    <div class="bn-label">Cours</div>
+    <div class="bn-badge">4</div>
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('live')">
+    <div class="bn-indicator"></div>
+    <div class="bn-icon">📡</div>
+    <div class="bn-label">Live</div>
+    <div class="bn-badge">2</div>
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('messages')">
+    <div class="bn-indicator"></div>
+    <div class="bn-icon">💬</div>
+    <div class="bn-label">Messages</div>
+    <div class="bn-badge">3</div>
+  </div>
+  <div class="bottom-nav-item" onclick="showPage('profile')">
+    <div class="bn-indicator"></div>
+    <div class="bn-icon">👤</div>
+    <div class="bn-label">Profil</div>
+  </div>
+</nav>
+
+<script>
+const pageTitles={home:'🏠 Accueil',courses:'📚 Mes Cours',catalogue:'🔍 Catalogue',live:'📡 Sessions Live',certificates:'🏆 Certificats',progress:'📈 Mes Progrès',messages:'💬 Messages',payments:'💳 Paiements',profile:'👤 Mon Profil',settings:'⚙️ Paramètres'};
+const bottomNavPages=['home','courses','live','messages','profile'];
+
+function showPage(id){
+  // Pages
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  const pg=document.getElementById('page-'+id);
+  if(pg) pg.classList.add('active');
+  // Page title
+  document.getElementById('page-title').textContent=pageTitles[id]||id;
+  // Sidebar nav
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    n.classList.toggle('active', n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"));
+  });
+  // Bottom nav
+  document.querySelectorAll('.bottom-nav-item').forEach((item,i)=>{
+    item.classList.toggle('active', bottomNavPages[i]===id);
+  });
+  // Close sidebar on mobile
+  if(window.innerWidth<=768) closeSidebar();
+  window.scrollTo(0,0);
+}
+
+function toggleSidebar(){
+  const sb=document.getElementById('sidebar');
+  const ov=document.getElementById('overlay');
+  const hb=document.getElementById('hamburger');
+  const isOpen=sb.classList.toggle('open');
+  ov.classList.toggle('show',isOpen);
+  hb.classList.toggle('open',isOpen);
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('overlay').classList.remove('show');
+  document.getElementById('hamburger').classList.remove('open');
+}
+
+// Toggles
+document.querySelectorAll('.toggle').forEach(btn=>{
+  btn.addEventListener('click',()=>btn.classList.toggle('on'));
+});
+// Filter tabs
+document.querySelectorAll('.ftab').forEach(tab=>{
+  tab.addEventListener('click',()=>{
+    tab.closest('.filter-bar').querySelectorAll('.ftab').forEach(t=>t.classList.remove('active'));
+    tab.classList.add('active');
+  });
+});
+// Chips
+document.querySelectorAll('.chip').forEach(chip=>{
+  chip.addEventListener('click',()=>{
+    chip.closest('.cat-filters').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+    chip.classList.add('active');
+  });
+});
+// Settings nav
+document.querySelectorAll('.sn-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.sn-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+// Conv items
+document.querySelectorAll('.conv-item').forEach(item=>{
+  item.addEventListener('click',()=>{
+    document.querySelectorAll('.conv-item').forEach(i=>i.classList.remove('active'));
+    item.classList.add('active');
+  });
+});
+// Mobile messages: open chat from conv
+function openChat(){
+  if(window.innerWidth<=768){
+    document.getElementById('conv-panel').style.display='none';
+    document.querySelector('.chat-panel').style.display='flex';
+  }
+}
+
+// Handle resize – reset messages panel
+window.addEventListener('resize',()=>{
+  if(window.innerWidth>768){
+    const cp=document.getElementById('conv-panel');
+    if(cp) cp.style.display='';
+    const chatPnl=document.querySelector('.chat-panel');
+    if(chatPnl) chatPnl.style.display='';
+  }
+});
+
+// Escape key closes sidebar
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape') closeSidebar();
+});
+</script>
+</body>
+</html>
